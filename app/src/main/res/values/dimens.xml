@@ -1,0 +1,16 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="card_container_margin">10dp</dimen>
+    <dimen name="card_between_space_margin">10dp</dimen>
+
+    <dimen name="header_margin">8dp</dimen>
+    <dimen name="grid_list_padding">5dp</dimen>
+
+    <dimen name="list_item">45dp</dimen>
+    <dimen name="iv_width_grid">150dp</dimen>
+    <dimen name="iv_height_grid">105dp</dimen>
+    <dimen name="tv_height_grid">20dp</dimen>
+</resources>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="fiction_data_tracks">
+        <item>Rishloo - Landmines</item>
+        <item>The Mars Volta - Eriatarka</item>
+        <item>Assemble Head In Sunburst Sound - Ekranoplan</item>
+        <item>Golden Void - Atlantis</item>
+        <item>Radiohead - Paranoid Android</item>
+
+        <item>Radiohead - The Reckoner</item>
+        <item>The Mars Volta - With Twilight As My Guide</item>
+        <item>The Mars Volta - Televators</item>
+        <item>Moby - Porcelain</item>
+        <item>Pink Floyd - Us And Them</item>
+
+        <item>Pink Floyd - Comfortably Numb</item>
+        <item>Pink Floyd - Marooned</item>
+        <item>Pink Floyd - Hey You</item>
+        <item>Pink Floyd - High Hopes</item>
+        <item>Pink Floyd - Time</item>
+    </array>
+
+    <array name="fiction_data_artists">
+        <item>The Mars Volta</item>
+        <item>Krobak</item>
+        <item>Porcupine Tree</item>
+        <item>Antemasque</item>
+
+        <item>Pink Floyd</item>
+        <item>Radiohead</item>
+        <item>Assemble Head In Sunburst Sound</item>
+        <item>Golden Void</item>
+    </array>
+
+    <array name="navigation_drawer_points">
+        <item>Home</item>
+        <item>Friends</item>
+    </array>
+</resources>

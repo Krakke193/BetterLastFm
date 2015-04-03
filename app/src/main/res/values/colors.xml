@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text_primary">#ffffff</color>
+    <color name="lastfm_red">#E61E1E</color>
+    <color name="lastfm_red_dark">#C71A1A</color>
+</resources>
