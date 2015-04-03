@@ -87,8 +87,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         int profilePlaycount = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_PLAYCOUNT);
         int profileRegDate = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_REGISTRY_DATE);
 
-        cursor.moveToFirst();
-
+        if (cursor.moveToFirst()){
             Picasso.with(this).load(cursor.getString(profileIconURL)).into(ivProfilePic);
             tvProfileName.setText(cursor.getString(profileName));
             tvProfileDetails.setText(
@@ -100,9 +99,8 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                             cursor.getString(profileRegDate)
             );
 
-
-
-        cursor.close();
+            cursor.close();
+        }
     }
 
     public void fillRecentTracks(){
@@ -119,8 +117,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         int recentTrackName = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
         int recentTrackURL = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
 
-        cursor.moveToFirst();
-
+        if (cursor.moveToFirst()){
             for (int i=0; i<5; i++) {
                 mListAdapter.add(new RecentTrack(
                         cursor.getString(recentTrackName),
@@ -134,7 +131,10 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             } while (cursor.moveToNext());
 
 
-        cursor.close();
+            cursor.close();
+        }
+
+
     }
 
     public void fillTopArtists(){
@@ -152,8 +152,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         int topArtistsName = cursor.getColumnIndex(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_NAME);
         int topArtistsPlaycount = cursor.getColumnIndex(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT);
 
-        cursor.moveToFirst();
-
+        if (cursor.moveToFirst()){
             for (int i=0; i<8; i++){
                 mGridAdapter.add(new TopArtist(
                         cursor.getString(topArtistsName),
@@ -163,6 +162,9 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 cursor.moveToNext();
             }
             cursor.close();
+        }
+
+
     }
 
     @Override
