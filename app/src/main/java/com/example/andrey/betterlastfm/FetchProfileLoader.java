@@ -3,6 +3,7 @@ package com.example.andrey.betterlastfm;
 import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.Window;
 
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
+import com.example.andrey.betterlastfm.data.RecentTracksProvider;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -31,6 +33,9 @@ import java.net.URL;
 public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
     private static final String LOG_TAG = FetchProfileLoader.class.getSimpleName();
+
+    final Uri CONTACT_URI = Uri
+            .parse("content://com.example.andrey.betterlastfm/tracks");
 
     private ArrayAdapter<RecentTrack> mListAdapter;
     private ArrayAdapter<TopArtist> mGridAdapter;
@@ -56,6 +61,11 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
         dbHelper = new ProfileDbHelper(mContext);
         mDbWrite = dbHelper.getWritableDatabase();
+
+        //Cursor cursorRes = mContext.getContentResolver().query(CONTACT_URI, null, null,
+        //        null, null);
+
+        //mContext.startManagingCursor(cursorRes);
     }
 
     /** Parsing JSON data for profile info and inserting database values! */
@@ -166,13 +176,21 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
 
             for (int i = 0; i < 10 /* 9*/; i++){
-                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL, profileRecentTracksUrlArray[i]);
-                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME, profileRecentTracksArray[i]);
-                mDbWrite.insert(ProfileContract.RecentTracksEntry.TABLE_NAME, null,
-                        recentTrackValues);
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
+                        profileRecentTracksUrlArray[i]);
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
+                        profileRecentTracksArray[i]);
+//                mDbWrite.insert(ProfileContract.RecentTracksEntry.TABLE_NAME, null,
+//                        recentTrackValues);
+
+                Uri newUri = mContext.getContentResolver()
+                        .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
+
+                Log.d(LOG_TAG, "insert, result Uri : " + newUri.toString());
+
                 counter++;
             }
-            Log.d(LOG_TAG, "Inserted " + Integer.toString(counter) + " rows");
+
         }
         return profileRecentTracksArray;
     }

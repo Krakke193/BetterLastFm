@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -37,6 +38,9 @@ import java.util.ArrayList;
 
 public class ProfileActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Void>{
     public final static String LOG_TAG = ProfileActivity.class.getSimpleName();
+
+    final Uri CONTACT_URI = Uri
+            .parse("content://com.example.andrey.betterlastfm/tracks");
 
     public static String userName = "se0ko";
 
@@ -171,7 +175,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
 
 
         ivProfilePic = (ImageView) findViewById(R.id.iv_profile_pic);
