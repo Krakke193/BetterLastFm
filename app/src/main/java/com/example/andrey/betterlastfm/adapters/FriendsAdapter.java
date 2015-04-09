@@ -1,4 +1,4 @@
-package com.example.andrey.betterlastfm;
+package com.example.andrey.betterlastfm.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,16 +8,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.andrey.betterlastfm.R;
+import com.example.andrey.betterlastfm.data.Friend;
 import com.squareup.picasso.Picasso;
 
 /**
  * Created by andrey on 11.03.15.
  */
-public class AdapterFriends extends ArrayAdapter<Friend> {
+public class FriendsAdapter extends ArrayAdapter<Friend> {
 
     private Context mContext;
 
-    public AdapterFriends(Context context, int resource) {
+    public FriendsAdapter(Context context, int resource) {
         super(context, resource);
         this.mContext = context;
     }
@@ -28,7 +30,7 @@ public class AdapterFriends extends ArrayAdapter<Friend> {
 
         View viewHolder = null;
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_list_friends, null);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_friends_list, null);
         }
 
         ((TextView) convertView.findViewById(R.id.tv_friend_name)).setText(friend.friendName);
@@ -45,13 +47,3 @@ public class AdapterFriends extends ArrayAdapter<Friend> {
     }
 }
 
-class Friend {
-
-    public String friendName;
-    public String friendImageURL;
-
-    public Friend (String friendName, String friendImageURL){
-        this.friendName = friendName;
-        this.friendImageURL = friendImageURL;
-    }
-}

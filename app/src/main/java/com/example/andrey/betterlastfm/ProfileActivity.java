@@ -5,6 +5,7 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -20,7 +21,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -30,8 +30,16 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.andrey.betterlastfm.adapters.ArtistsAdapter;
+import com.example.andrey.betterlastfm.adapters.NavigationListAdapter;
+import com.example.andrey.betterlastfm.adapters.TracksAdapter;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
+import com.example.andrey.betterlastfm.data.RecentTrack;
+import com.example.andrey.betterlastfm.data.RecentTracksProvider;
+
+import com.example.andrey.betterlastfm.data.TopArtist;
+import com.example.andrey.betterlastfm.loaders.FetchProfileLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -39,20 +47,14 @@ import java.util.ArrayList;
 public class ProfileActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Void>{
     public final static String LOG_TAG = ProfileActivity.class.getSimpleName();
 
-    final Uri CONTACT_URI = Uri
-            .parse("content://com.example.andrey.betterlastfm/tracks");
+    public static String userName;
 
-    public static String userName = "se0ko";
-
-    private RecyclerView mRecyclerView;                           // Declaring RecyclerView
-    private RecyclerView.Adapter mAdapter;                        // Declaring Adapter For Recycler View
-    private RecyclerView.LayoutManager mLayoutManager;            // Declaring Layout Manager as a linear layout manager
-    private DrawerLayout mDrawer;                                  // Declaring DrawerLayout
+    private DrawerLayout mDrawer;
     private int mIcons[] = {R.drawable.home, R.drawable. friends};
     private String mTitles[] = {"Home", "Friends"};
     private Toolbar mToolbar;
 
-    private ActionBarDrawerToggle mDrawerToggle;                  // Declaring Action Bar Drawer Toggle
+    private ActionBarDrawerToggle mDrawerToggle;
 
     public ArrayAdapter<RecentTrack> mListAdapter;
     public ArrayAdapter<TopArtist> mGridAdapter;
@@ -60,7 +62,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     public GridView gridView;
     private Button mButton;
     private CardView mCardList;
-    //private TaskFetchProfile taskFetchProfile;
     private ProfileDbHelper profileDbHelper;
     private SQLiteDatabase db;
 
@@ -108,37 +109,24 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     }
 
     public void fillRecentTracks(){
-        Cursor cursor = db.query(
-                ProfileContract.RecentTracksEntry.TABLE_NAME,
+        Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
                 null,
                 null,
                 null,
-                null,
-                null,
-                null
-        );
+                null);
 
-        int recentTrackName = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
-        int recentTrackURL = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
+        int recentTrackNameIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+        int recentTrackURLIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
 
         if (cursor.moveToFirst()){
             for (int i=0; i<5; i++) {
                 mListAdapter.add(new RecentTrack(
-                        cursor.getString(recentTrackName),
-                        cursor.getString(recentTrackURL)));
+                        cursor.getString(recentTrackNameIndex),
+                        cursor.getString(recentTrackURLIndex)));
                 cursor.moveToNext();
             }
-
-            cursor.moveToFirst();
-            do {
-                Log.d(LOG_TAG, cursor.getString(recentTrackName));
-            } while (cursor.moveToNext());
-
-
             cursor.close();
         }
-
-
     }
 
     public void fillTopArtists(){
@@ -167,8 +155,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             }
             cursor.close();
         }
-
-
     }
 
     @Override
@@ -176,12 +162,15 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
+        userName = sharedPreferences.getString("username", "ERROR");
 
         ivProfilePic = (ImageView) findViewById(R.id.iv_profile_pic);
         tvProfileName = (TextView) findViewById(R.id.tv_profile_name);
         tvProfileDetails = (TextView) findViewById(R.id.tv_profile_details);
         tvProfileListens = (TextView) findViewById(R.id.tv_profile_listens);
         profileProgressBar = (ProgressBar) findViewById(R.id.profile_progress_bar);
+
         profileContext = this.getApplicationContext();
         profileDbHelper = new ProfileDbHelper(this);
         db = profileDbHelper.getReadableDatabase();
@@ -198,48 +187,30 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             userName = getIntent().getStringExtra("user");
         }
 
-        mListAdapter = new AdapterList(this,R.layout.list_item);
+        mListAdapter = new TracksAdapter(this,R.layout.item_recent_tracks_list);
         listView.setAdapter(mListAdapter);
 
-        mGridAdapter = new AdapterGrid(this,R.layout.grid_item);
+        mGridAdapter = new ArtistsAdapter(this,R.layout.item_top_artists_grid);
         gridView.setAdapter(mGridAdapter);
 
         getLoaderManager().initLoader(0, null, this);
 
-//        FragmentManager fragmentManager = this.getSupportFragmentManager();
-//        RecentTracksFragment recentTracksFragment = (RecentTracksFragment) fragmentManager.findFragmentById(R.id.fragment_recent_tracks);
-
-        if (userName.equals("se0ko")){
+        if (userName.equals(sharedPreferences.getString("username", "ERROR"))){
             fillHeader();
             fillRecentTracks();
             fillTopArtists();
         } else {
-//            supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-//            setSupportProgressBarIndeterminateVisibility(true);
             profileProgressBar.setVisibility(View.VISIBLE);
             try {
-                //taskFetchProfile.execute(userName);
                 getLoaderManager().getLoader(0).forceLoad();
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
-
-//            for (int i=0; i<5; i++){
-//                mListAdapter.add(new RecentTrack("NO DATA", null));
-//            }
-//            for (int i=0; i<8; i++){
-//                mGridAdapter.add(new TopArtist("NO DATA", "no data", null));
-//            }
-
         }
 
         //setListViewHeightBasedOnChildren(listView);
         //setListViewHeightBasedOnChildren(gridView);
-
-        //taskFetchProfile = new TaskFetchProfile(this, mListAdapter, mGridAdapter, userName);
-
-
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,15 +230,11 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 } else{
                     startActivity(intent);
                 }
-
-
             }
         });
         /** All with navigation drawer here: */
 
-        // Attaching the layout to the toolbar object
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        // Setting toolbar as the ActionBar with setSupportActionBar() call
         setSupportActionBar(mToolbar);
 
         ListView navigationListView = (ListView) findViewById(R.id.navigation_listview);
@@ -290,17 +257,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             }
         });
 
-//        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view); // Assigning the RecyclerView Object to the xml View
-//        mRecyclerView.setHasFixedSize(true);                            // Letting the system know that the list objects are of fixed size
-//        mAdapter = new NavigationAdapter(mTitles, mIcons,"se0ko","Da eto ya", R.drawable.male);       // Creating the Adapter of MyAdapter class(which we are going to see in a bit)
-//        // And passing the titles,icons,header view name, header view email,
-//        // and header view profile picture
-//
-//        mRecyclerView.setAdapter(mAdapter);                              // Setting the adapter to RecyclerView
-//        mLayoutManager = new LinearLayoutManager(this);                 // Creating a layout Manager
-//        mRecyclerView.setLayoutManager(mLayoutManager);                 // Setting the layout Manager
-
-        mDrawer = (DrawerLayout) findViewById(R.id.DrawerLayout);        // Drawer object Assigned to the view
+        mDrawer = (DrawerLayout) findViewById(R.id.DrawerLayout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer , mToolbar, R.string.open_drawer,R.string.close_drawer){
 
             @Override
@@ -316,12 +273,11 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 // Code here will execute once drawer is closed
             }
 
-        }; // Drawer Toggle Object Made
-        mDrawer.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
-        mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
+        };
+        mDrawer.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -351,9 +307,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
     @Override
     public Loader<Void> onCreateLoader(int id, Bundle args) {
-        FetchProfileLoader fetchProfileLoader = new FetchProfileLoader(this, mListAdapter, mGridAdapter, userName);
-        //fetchProfileLoader.forceLoad();
-        return fetchProfileLoader;
+        return new FetchProfileLoader(this, mListAdapter, mGridAdapter, userName);
     }
 
     @Override
@@ -366,51 +320,4 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         Log.d(LOG_TAG, "Loader reseted?");
     }
 
-    //    public void setListViewHeightBasedOnChildren(ListView listView) {
-//        android.widget.AdapterList listAdapter = listView.getAdapter();
-//        if (listAdapter == null)
-//            return;
-//
-//        float totalHeight = listAdapter.getCount() * this.getResources().getDimension(R.dimen.list_item);
-//        ViewGroup.LayoutParams params = listView.getLayoutParams();
-//        params.height = (int)totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
-//
-//
-//        /** Method found on Internet. */
-////        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
-////        int totalHeight = 0;
-////        int debugingCount = 0;
-////        View view = null;
-////        for (int i = 0; i < listAdapter.getCount(); i++) {
-////            view = listAdapter.getView(i, null, listView);
-////            if (i == 0)
-////                view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, RadioGroup.LayoutParams.WRAP_CONTENT));
-////
-////            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-////
-////            //view.measure(View.MeasureSpec.makeMeasureSpec(desiredWidth, View.MeasureSpec.AT_MOST)
-////            //       , View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-////
-////            totalHeight += view.getMeasuredHeight();
-////            Log.d("Profile Activity", Integer.toString(totalHeight));
-////            debugingCount++;
-////        }
-////        Log.d("Profile Activity", Integer.toString(debugingCount));
-////
-////        ViewGroup.LayoutParams params = listView.getLayoutParams();
-////        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
-////        listView.setLayoutParams(params);
-////        listView.requestLayout();
-//    }
-//
-//    public void setListViewHeightBasedOnChildren(GridView gridView) {
-//        android.widget.AdapterList listAdapter = gridView.getAdapter();
-//        if (listAdapter == null)
-//            return;
-//
-//        float totalHeight = (listAdapter.getCount() / 2) * (this.getResources().getDimension(R.dimen.iv_height_grid)
-//                + this.getResources().getDimension(R.dimen.tv_height_grid));
-//        ViewGroup.LayoutParams params = gridView.getLayoutParams();
-//        params.height = (int)totalHeight;
-//    }
 }

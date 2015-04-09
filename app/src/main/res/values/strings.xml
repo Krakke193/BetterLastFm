@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Better Last.fm</string>
 
+    <string name="account_login">Account name or email:</string>
+    <string name="account_password">Password:</string>
+
     <string name="content_authority">com.example.andrey.betterlastfm</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

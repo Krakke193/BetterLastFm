@@ -1,19 +1,21 @@
-package com.example.andrey.betterlastfm;
+package com.example.andrey.betterlastfm.loaders;
 
 import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.view.Window;
 
+import com.example.andrey.betterlastfm.ProfileActivity;
+import com.example.andrey.betterlastfm.R;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
+import com.example.andrey.betterlastfm.data.RecentTrack;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
+import com.example.andrey.betterlastfm.data.TopArtist;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -61,11 +63,6 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
         dbHelper = new ProfileDbHelper(mContext);
         mDbWrite = dbHelper.getWritableDatabase();
-
-        //Cursor cursorRes = mContext.getContentResolver().query(CONTACT_URI, null, null,
-        //        null, null);
-
-        //mContext.startManagingCursor(cursorRes);
     }
 
     /** Parsing JSON data for profile info and inserting database values! */
@@ -164,15 +161,13 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
         /**
          * Database insertion!
          */
-        int counter = 0;
+
         if (mUserName.equals("se0ko")){
             ContentValues recentTrackValues = new ContentValues();
 
-            mDbWrite.delete(
-                    ProfileContract.RecentTracksEntry.TABLE_NAME,
-                    null,
-                    null
-            );
+            int deleted = mContext.getContentResolver()
+                    .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
+            Log.d(LOG_TAG, "deleted " + deleted + "rows!");
 
 
             for (int i = 0; i < 10 /* 9*/; i++){
@@ -180,15 +175,12 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                         profileRecentTracksUrlArray[i]);
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
                         profileRecentTracksArray[i]);
-//                mDbWrite.insert(ProfileContract.RecentTracksEntry.TABLE_NAME, null,
-//                        recentTrackValues);
 
                 Uri newUri = mContext.getContentResolver()
                         .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
 
                 Log.d(LOG_TAG, "insert, result Uri : " + newUri.toString());
 
-                counter++;
             }
 
         }
@@ -307,9 +299,6 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
             String line;
             while ((line = reader.readLine()) != null){
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging.
                 buffer.append(line + "\n");
             }
 
@@ -318,9 +307,16 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
             profileJsonStr = buffer.toString();
 
-        } catch (IOException e){
+            getProfileInfoFromJson(profileJsonStr);
+
+        } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             return null;
+
+        } catch (JSONException e){
+            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
+            e.printStackTrace();
+
         } finally {
             if (urlConnection != null)
                 urlConnection.disconnect();
@@ -331,12 +327,6 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                     Log.e(LOG_TAG, " Error closing stream ", e);
                 }
             }
-        }
-        try {
-            getProfileInfoFromJson(profileJsonStr);
-        } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
-            e.printStackTrace();
         }
 
         /** Getting recent tracks!*/
@@ -373,9 +363,17 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                 return null;
 
             profileRecentTracksJsonStr = buffer.toString();
-        } catch (IOException e){
+
+            getRecentTracksFromJson(profileRecentTracksJsonStr);
+
+        } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             return null;
+
+        } catch (JSONException e){
+            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
+            e.printStackTrace();
+
         } finally {
             if (urlConnection != null)
                 urlConnection.disconnect();
@@ -386,12 +384,6 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                     Log.e(LOG_TAG, " Error closing stream ", e);
                 }
             }
-        }
-        try {
-            getRecentTracksFromJson(profileRecentTracksJsonStr);
-        } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
-            e.printStackTrace();
         }
 
         /** Getting top artists! */
@@ -430,9 +422,17 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                 return null;
 
             profileTopArtistsJsonStr = buffer.toString();
-        } catch (IOException e){
+
+            getTopArtistsFromJson(profileTopArtistsJsonStr);
+
+        } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             return null;
+
+        } catch (JSONException e){
+            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
+            e.printStackTrace();
+
         } finally {
             if (urlConnection != null)
                 urlConnection.disconnect();
@@ -445,13 +445,6 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             }
         }
 
-        try {
-            getTopArtistsFromJson(profileTopArtistsJsonStr);
-        } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
-            e.printStackTrace();
-        }
-
         return null;
     }
 
@@ -459,11 +452,6 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
     public void deliverResult(Void data) {
         super.deliverResult(data);
 
-        //TaskDownloadImage taskDownloadImage = new TaskDownloadImage(ProfileActivity.ivProfilePic);
-        //DownloadImageLoader downloadImageLoader = new DownloadImageLoader(mContext, ProfileActivity.ivProfilePic,profileHeaderArray[0]);
-
-        //taskDownloadImage.execute(profileHeaderArray[0]);
-        //downloadImageLoader.forceLoad();
         Picasso.with(mContext).load(profileHeaderArray[0]).into(ProfileActivity.ivProfilePic);
         ProfileActivity.tvProfileName.setText(profileHeaderArray[1]);
         ProfileActivity.tvProfileDetails.setText(

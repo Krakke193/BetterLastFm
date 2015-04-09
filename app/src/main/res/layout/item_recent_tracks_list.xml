@@ -8,7 +8,9 @@
     <ImageView
         android:id="@+id/list_imageview"
         android:layout_width="@dimen/list_item"
-        android:layout_height="match_parent"
+        android:layout_height="45dp"
+        android:gravity="center"
+        android:layout_gravity="center"
         android:src="@drawable/female"/>
 
     <TextView
@@ -19,8 +21,5 @@
         android:layout_marginLeft="@dimen/card_between_space_margin"
         android:gravity="center_vertical"
         android:textSize="15sp" />
-
-
-
 
 </LinearLayout>

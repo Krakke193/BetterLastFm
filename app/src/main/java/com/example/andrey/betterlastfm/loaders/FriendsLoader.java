@@ -1,10 +1,12 @@
-package com.example.andrey.betterlastfm;
+package com.example.andrey.betterlastfm.loaders;
 
+import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+
+import com.example.andrey.betterlastfm.data.Friend;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,21 +20,97 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Created by andrey on 11.03.15.
+ * Created by Andrey on 08.04.2015.
  */
-public class TaskFetchFriends extends AsyncTask<String, Void, Void> {
+public class FriendsLoader extends AsyncTaskLoader<Void> {
+    private final String LOG_TAG = FriendsLoader.class.getSimpleName();
 
-    private final String LOG_TAG = this.getClass().getSimpleName();
-    private Context context;
-    private ArrayAdapter<Friend> arrayAdapter;
-    private String friendsJsonStr = null;
+    private Context mContext;
+    private ArrayAdapter<Friend> mArrayAdapter;
+    private String mUserName;
 
+    //private String friendsJsonStr = null;
     private String[] friendsArray = new String[10];
     private String[] friendsImageUrlArray = new String[10];
 
-    TaskFetchFriends(Context context, ArrayAdapter<Friend> arrayAdapter){
-        this.context = context;
-        this.arrayAdapter = arrayAdapter;
+    public FriendsLoader(Context context, ArrayAdapter<Friend> arrayAdapter, String userName){
+        super(context);
+        this.mContext = context;
+        this.mArrayAdapter = arrayAdapter;
+        this.mUserName = userName;
+    }
+
+    @Override
+    public Void loadInBackground() {
+        if (mUserName.equals(""))
+            return null;
+
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
+
+        String format = "json";
+        String apiKey = "90167bec56ea0d23c263e7a59a395eb2";
+        String limit = "10";
+        String methodType = "user.getfriends";
+
+        try {
+            final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
+            final String METHOD_TYPE = "method";
+            final String USER = "user";
+            final String API_KEY = "api_key";
+            final String LIMIT = "limit";
+            final String FORMAT = "format";
+
+            Uri builtUri = Uri.parse(PROFILE_BASE_URL).buildUpon()
+                    .appendQueryParameter(METHOD_TYPE, methodType)
+                    .appendQueryParameter(USER, mUserName)
+                    .appendQueryParameter(API_KEY, apiKey)
+                    .appendQueryParameter(LIMIT,limit)
+                    .appendQueryParameter(FORMAT, format)
+                    .build();
+            URL url = new URL(builtUri.toString());
+
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+            if (inputStream == null)
+                return null;
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null){
+                buffer.append(line + "\n");
+            }
+
+            if (buffer.length() == 0)
+                return null;
+
+            String friendsJsonStr = buffer.toString();
+
+            getFriendsFromJson(friendsJsonStr);
+
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error ", e);
+            return null;
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, "Error parcing JSON friends: ", e);
+            e.printStackTrace();
+        } finally {
+            if (urlConnection != null)
+                urlConnection.disconnect();
+            if (reader != null){
+                try {
+                    reader.close();
+                } catch (IOException e){
+                    Log.e(LOG_TAG, " Error closing stream ", e);
+                }
+            }
+        }
+
+        return null;
     }
 
     private Void getFriendsFromJson(String friendsJsonStr) throws JSONException{
@@ -68,86 +146,12 @@ public class TaskFetchFriends extends AsyncTask<String, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(String... userName) {
-        if (userName.length == 0)
-            return null;
+    public void deliverResult(Void data) {
+        super.deliverResult(data);
 
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-
-        String user = userName[0];
-        String format = "json";
-        String apiKey = "90167bec56ea0d23c263e7a59a395eb2";
-        String limit = "10";
-        String methodType = "user.getfriends";
-
-        try {
-            final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
-            final String METHOD_TYPE = "method";
-            final String USER = "user";
-            final String API_KEY = "api_key";
-            final String LIMIT = "limit";
-            final String FORMAT = "format";
-
-            Uri builtUri = Uri.parse(PROFILE_BASE_URL).buildUpon()
-                    .appendQueryParameter(METHOD_TYPE, methodType)
-                    .appendQueryParameter(USER, user)
-                    .appendQueryParameter(API_KEY, apiKey)
-                    .appendQueryParameter(LIMIT,limit)
-                    .appendQueryParameter(FORMAT, format)
-                    .build();
-            URL url = new URL(builtUri.toString());
-
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-            if (inputStream == null)
-                return null;
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null){
-                buffer.append(line + "\n");
-            }
-
-            if (buffer.length() == 0)
-                return null;
-
-            friendsJsonStr = buffer.toString();
-
-        } catch (IOException e){
-            Log.e(LOG_TAG, "Error ", e);
-            return null;
-        } finally {
-            if (urlConnection != null)
-                urlConnection.disconnect();
-            if (reader != null){
-                try {
-                    reader.close();
-                } catch (IOException e){
-                    Log.e(LOG_TAG, " Error closing stream ", e);
-                }
-            }
-        }
-
-        try {
-            getFriendsFromJson(friendsJsonStr);
-        } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON friends: ", e);
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        arrayAdapter.clear();
+        mArrayAdapter.clear();
         for (int i=0; i<friendsArray.length; i++){
-            arrayAdapter.add(new Friend(friendsArray[i], friendsImageUrlArray[i]));
+            mArrayAdapter.add(new Friend(friendsArray[i], friendsImageUrlArray[i]));
         }
     }
 }

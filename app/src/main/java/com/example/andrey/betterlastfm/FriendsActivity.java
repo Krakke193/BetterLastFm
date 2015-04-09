@@ -10,30 +10,29 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.example.andrey.betterlastfm.adapters.FriendsAdapter;
+import com.example.andrey.betterlastfm.loaders.FriendsLoader;
+
 
 public class FriendsActivity extends ActionBarActivity {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
-    private AdapterFriends mFrienListAdapter;
-    private ListView friendList;
-    private TaskFetchFriends taskFetchFriends;
+    private FriendsAdapter mFrienListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
 
-        friendList = (ListView) findViewById(R.id.friend_list);
-        mFrienListAdapter = new AdapterFriends(this, R.layout.item_list_friends);
-//        for (int i=0; i<10; i++){
-//            mFrienListAdapter.add(new Friend("NO DATA", null));
-//        }
+        ListView friendList = (ListView) findViewById(R.id.friend_list);
+        mFrienListAdapter = new FriendsAdapter(this, R.layout.item_friends_list);
+
         String userName = getIntent().getStringExtra("user");
 
         friendList.setAdapter(mFrienListAdapter);
 
-        taskFetchFriends = new TaskFetchFriends(this, mFrienListAdapter);
-        taskFetchFriends.execute(userName);
+        FriendsLoader friendsLoader = new FriendsLoader(this, mFrienListAdapter, userName);
+        friendsLoader.forceLoad();
 
         friendList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -63,8 +62,6 @@ public class FriendsActivity extends ActionBarActivity {
 
         if (id == R.id.action_settings) {
             return true;
-        } else if (id == R.id.friends_action_refresh){
-            taskFetchFriends.execute("se0ko");
         }
 
         return super.onOptionsItemSelected(item);

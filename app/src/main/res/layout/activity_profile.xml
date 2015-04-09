@@ -46,13 +46,13 @@
                     <requestFocus/>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
                         android:paddingLeft="@dimen/card_container_margin"
                         android:paddingRight="@dimen/card_container_margin"
                         android:paddingTop="@dimen/card_container_margin"
                         android:paddingBottom="@dimen/card_container_margin"
-                        android:orientation="vertical">
+                        android:orientation="horizontal">
 
                         <ImageView
                             android:id="@+id/iv_profile_pic"
@@ -63,28 +63,38 @@
                             android:layout_gravity="center_horizontal"
                             android:layout_marginBottom="@dimen/header_margin" />
 
-                        <TextView
-                            android:text="no data"
-                            android:id="@+id/tv_profile_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="@dimen/header_margin"/>
+                        <LinearLayout
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:gravity="center_vertical"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:text="no data"
-                            android:id="@+id/tv_profile_details"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="@dimen/header_margin"/>
+                            <TextView
+                                android:text="no data"
+                                android:id="@+id/tv_profile_name"
+                                android:textAppearance="?android:textAppearanceMedium"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginBottom="@dimen/header_margin"/>
 
-                        <TextView
-                            android:text="no data"
-                            android:id="@+id/tv_profile_listens"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal" />
+                            <TextView
+                                android:text="no data"
+                                android:id="@+id/tv_profile_details"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginBottom="@dimen/header_margin"/>
+
+                            <TextView
+                                android:text="no data"
+                                android:id="@+id/tv_profile_listens"
+                                android:gravity="center"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -99,14 +109,6 @@
                     android:transitionName="listCard"
                     android:layout_marginBottom="@dimen/card_between_space_margin">
 
-                    <!--<fragment-->
-                        <!--xmlns:tools="http://schemas.android.com/tools"-->
-                        <!--android:name="com.example.andrey.betterlastfm.RecentTracksFragment"-->
-                        <!--android:id="@+id/fragment_recent_tracks"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="700dp"-->
-                        <!--tools:context="com.example.andrey.betterlastfm.RecentTracksFragment"-->
-                        <!--tools:layout="@android:layout/list_content"/>-->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="400dp"
@@ -119,7 +121,7 @@
                         <ListView
                             android:id="@+id/list_recent_tracks"
                             android:layout_width="match_parent"
-                            android:layout_height="350dp"/>
+                            android:layout_height="330dp"/>
 
                         <Button
                             android:id="@+id/button_expand_list"
@@ -132,25 +134,21 @@
 
                 </android.support.v7.widget.CardView>
 
-                <android.support.v7.widget.CardView
-                    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                    android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
-                    android:paddingLeft="@dimen/grid_list_padding"
-                    android:paddingRight="@dimen/grid_list_padding"
-                    android:paddingTop="@dimen/grid_list_padding"
-                    android:paddingBottom="@dimen/grid_list_padding">
+                <!--<android.support.v7.widget.CardView-->
+                    <!--xmlns:card_view="http://schemas.android.com/apk/res-auto"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="fill_parent"-->
+                    <!--android:paddingLeft="@dimen/grid_list_padding"-->
+                    <!--android:paddingRight="@dimen/grid_list_padding"-->
+                    <!--android:paddingTop="@dimen/grid_list_padding"-->
+                    <!--android:paddingBottom="@dimen/grid_list_padding">-->
 
                     <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:paddingLeft="@dimen/grid_list_padding"
-                        android:paddingRight="@dimen/grid_list_padding"
-                        android:paddingTop="@dimen/grid_list_padding"
-                        android:paddingBottom="@dimen/grid_list_padding">
+                        android:layout_height="match_parent">
 
                         <GridView
-                            android:numColumns="2"
+                            android:numColumns="3"
                             android:id="@+id/grid_top_artists"
                             android:layout_width="match_parent"
                             android:layout_height="600dp">
@@ -158,7 +156,7 @@
 
                     </FrameLayout>
 
-                </android.support.v7.widget.CardView>
+                <!--</android.support.v7.widget.CardView>-->
 
             </LinearLayout>
 

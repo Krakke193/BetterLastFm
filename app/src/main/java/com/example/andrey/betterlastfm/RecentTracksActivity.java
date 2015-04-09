@@ -11,21 +11,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import com.example.andrey.betterlastfm.adapters.TracksAdapter;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
+import com.example.andrey.betterlastfm.data.RecentTrack;
+import com.example.andrey.betterlastfm.data.RecentTracksProvider;
+import com.example.andrey.betterlastfm.loaders.RecentTracksLoader;
 
 import java.util.ArrayList;
 
 
 public class RecentTracksActivity extends ActionBarActivity {
-
     private static final String LOG_TAG = RecentTracksActivity.class.getSimpleName();
-
-    private ListView mListView;
-    private AdapterList mListAdapter;
-    private Toolbar mToolbar;
-    private SQLiteDatabase db;
-    private ProfileDbHelper profileDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,31 +32,22 @@ public class RecentTracksActivity extends ActionBarActivity {
         Intent intent = getIntent();
         ArrayList<String> passDataArr = intent.getStringArrayListExtra("passKey");
 
-        mListView = (ListView) this.findViewById(R.id.list_recent_tracks);
+        ListView mListView = (ListView) this.findViewById(R.id.list_recent_tracks);
         mListView.setScrollContainer(false);
-        mListAdapter = new AdapterList(this,R.layout.list_item);
+        TracksAdapter mListAdapter = new TracksAdapter(this,R.layout.item_recent_tracks_list);
         mListView.setAdapter(mListAdapter);
 
-        profileDbHelper = new ProfileDbHelper(this);
-        db = profileDbHelper.getReadableDatabase();
-
         if (ProfileActivity.userName.equals("se0ko")){
-
-
-            Cursor cursor = db.query(
-                    ProfileContract.RecentTracksEntry.TABLE_NAME,
+            Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
                     null,
                     null,
                     null,
-                    null,
-                    null,
-                    null
-            );
+                    null);
 
             int recentTrackIconURL = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
             int recentTrackName = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
-            cursor.moveToFirst();
 
+            cursor.moveToFirst();
             for (int i=0; i<10; i++){
                 mListAdapter.add(new RecentTrack(
                         cursor.getString(recentTrackName),
@@ -69,23 +57,15 @@ public class RecentTracksActivity extends ActionBarActivity {
             }
 
             cursor.close();
+
         } else {
-            for (int i=0; i<5; i++){
-                mListAdapter.add(new RecentTrack(
-                        passDataArr.get(i),
-                        null));
-            }
+            RecentTracksLoader rtl = new RecentTracksLoader(this, mListAdapter, ProfileActivity.userName);
+            rtl.forceLoad();
         }
 
-
-
-        // Attaching the layout to the toolbar object
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        // Setting toolbar as the ActionBar with setSupportActionBar() call
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -112,7 +92,5 @@ public class RecentTracksActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        db.close();
-        Log.d(LOG_TAG, "Database closed!");
     }
 }

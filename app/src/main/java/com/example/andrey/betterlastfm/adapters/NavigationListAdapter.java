@@ -1,4 +1,4 @@
-package com.example.andrey.betterlastfm;
+package com.example.andrey.betterlastfm.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.andrey.betterlastfm.R;
 
 /**
  * Created by Андрей on 25.03.2015.
