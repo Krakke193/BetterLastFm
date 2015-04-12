@@ -2,19 +2,16 @@ package com.example.andrey.betterlastfm;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
 import com.example.andrey.betterlastfm.adapters.TracksAdapter;
 import com.example.andrey.betterlastfm.data.ProfileContract;
-import com.example.andrey.betterlastfm.data.ProfileDbHelper;
-import com.example.andrey.betterlastfm.data.RecentTrack;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
 import com.example.andrey.betterlastfm.loaders.RecentTracksLoader;
 
@@ -42,19 +39,44 @@ public class RecentTracksActivity extends ActionBarActivity {
                     null,
                     null,
                     null,
-                    null);
+                    ProfileContract.RecentTracksEntry._ID + " " + "DESC");
 
-            int recentTrackIconURL = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
-            int recentTrackName = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackIconURL = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
+            int recentTrackArtist = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
+            int recentTrackName = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
 
             cursor.moveToFirst();
-            for (int i=0; i<10; i++){
+
+            do {
                 mListAdapter.add(new RecentTrack(
-                        cursor.getString(recentTrackName),
+                        cursor.getString(recentTrackArtist) + " - " + cursor.getString(recentTrackName),
                         cursor.getString(recentTrackIconURL)
                 ));
-                cursor.moveToNext();
-            }
+
+//                cursor.moveToNext();
+            } while (cursor.moveToNext());
+//            for (int j=0; j<5; j++){
+//                mListAdapter.add(new RecentTrack(null, null));
+//            }
+
+//            for (int i=0; i<10; i++){
+//                mListAdapter.add(new RecentTrack(
+//                        cursor.getString(recentTrackName),
+//                        cursor.getString(recentTrackIconURL)
+//                ));
+//                if (cursor.moveToNext()){
+//
+//                } else {
+//                    for (int j=0; j<5; j++){
+//                        mListAdapter.add(new RecentTrack(null, null));
+//                    }
+//
+//                }
+////                cursor.moveToNext();
+//            }
 
             cursor.close();
 

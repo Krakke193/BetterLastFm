@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.R;
 import com.squareup.picasso.Picasso;
-import com.example.andrey.betterlastfm.data.RecentTrack;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 
 /**
  * Created by andrey on 01.03.15.

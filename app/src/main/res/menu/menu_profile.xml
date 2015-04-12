@@ -11,6 +11,10 @@
         android:title="Refresh"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_scrobble"
+        android:title="Scrobble"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_friends"
         android:title="Friends"
         app:showAsAction="never" />

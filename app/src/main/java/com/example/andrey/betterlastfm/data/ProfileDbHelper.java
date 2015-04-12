@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by andrey on 13.03.15.
  */
 public class ProfileDbHelper extends SQLiteOpenHelper{
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 5;
     static final String DATABASE_NAME = "profile.db";
 
     public ProfileDbHelper(Context context){
@@ -51,8 +51,11 @@ public class ProfileDbHelper extends SQLiteOpenHelper{
         final String SQL_CREATE_RECENT_TRACKS_TABLE = "CREATE TABLE " +
                 ProfileContract.RecentTracksEntry.TABLE_NAME + " (" +
                 ProfileContract.RecentTracksEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST + " TEXT NOT NULL, " +
                 ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME + " TEXT NOT NULL, " +
-                ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL + " TEXT NOT NULL " + " );";
+                ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP + " TEXT NOT NULL, " +
+                ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL + " TEXT NOT NULL, " +
+                ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG + " INTEGER NOT NULL" + " );";
 
         final String SQL_CREATE_TOP_ARTISTS_TABLE = "CREATE TABLE " +
                 ProfileContract.TopArtistsEntry.TABLE_NAME + " (" +

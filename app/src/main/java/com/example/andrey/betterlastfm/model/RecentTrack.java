@@ -1,4 +1,4 @@
-package com.example.andrey.betterlastfm.data;
+package com.example.andrey.betterlastfm.model;
 
 /**
  * Created by Andrey on 08.04.2015.

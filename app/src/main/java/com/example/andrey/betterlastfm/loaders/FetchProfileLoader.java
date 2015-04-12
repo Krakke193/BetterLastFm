@@ -13,9 +13,9 @@ import com.example.andrey.betterlastfm.ProfileActivity;
 import com.example.andrey.betterlastfm.R;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
-import com.example.andrey.betterlastfm.data.RecentTrack;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
-import com.example.andrey.betterlastfm.data.TopArtist;
+import com.example.andrey.betterlastfm.model.TopArtist;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -47,7 +47,9 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
     private SQLiteDatabase mDbWrite;
 
     private String[] profileHeaderArray = new String[7];
-    private String[] profileRecentTracksArray = new String[11];
+    private String[] profileRecentTracksTitle = new String[11];
+    private String[] profileRecentTracksArtist = new String[11];
+    //private String[] profileRecentTracksArray = new String[11];
     private String[] profileRecentTracksUrlArray = new String[11];
     private String[] profileTopArtistsArray = new String[8];
     private String[] profileTopArtistsArrayPlaycount = new String[8];
@@ -139,8 +141,12 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             JSONArray recentTracksArr = recentTracksJson.getJSONArray("track");
 
             for (int i=0; i<recentTracksArr.length(); i++){
-                profileRecentTracksArray[i] = recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST)
-                        + " - " + recentTracksArr.getJSONObject(i).getString(NAME);
+                profileRecentTracksArtist[i] = recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST);
+                profileRecentTracksTitle[i] = recentTracksArr.getJSONObject(i).getString(NAME);
+
+
+//                profileRecentTracksArray[i] = recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST)
+//                        + " - " + recentTracksArr.getJSONObject(i).getString(NAME);
 
                 JSONArray imageJson = recentTracksArr.getJSONObject(i).getJSONArray("image");
 
@@ -170,11 +176,18 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             Log.d(LOG_TAG, "deleted " + deleted + "rows!");
 
 
-            for (int i = 0; i < 10 /* 9*/; i++){
+            for (int i = 10; i > 0 /* 9*/; i--){
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
                         profileRecentTracksUrlArray[i]);
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST,
+                        profileRecentTracksArtist[i]);
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
-                        profileRecentTracksArray[i]);
+                        profileRecentTracksTitle[i]);
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP,
+                        "");
+
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG,
+                        0);
 
                 Uri newUri = mContext.getContentResolver()
                         .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
@@ -184,7 +197,7 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             }
 
         }
-        return profileRecentTracksArray;
+        return profileRecentTracksUrlArray;
     }
 
     /** Parsing JSON data for top artists and inserting database values! */
@@ -471,7 +484,7 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
         mListAdapter.clear();
         for(int i=0; i<5 /*profileRecentTracksArray.length*/; i++) {
             mListAdapter.add(new RecentTrack(
-                    profileRecentTracksArray[i],
+                    profileRecentTracksArtist[i] + " - " + profileRecentTracksTitle[i],
                     profileRecentTracksUrlArray[i]
             ));
         }

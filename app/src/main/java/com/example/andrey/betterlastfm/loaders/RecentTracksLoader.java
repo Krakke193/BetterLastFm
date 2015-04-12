@@ -1,15 +1,12 @@
 package com.example.andrey.betterlastfm.loaders;
 
 import android.content.AsyncTaskLoader;
-import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-import com.example.andrey.betterlastfm.data.ProfileContract;
-import com.example.andrey.betterlastfm.data.RecentTrack;
-import com.example.andrey.betterlastfm.data.RecentTracksProvider;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 
 import org.json.JSONArray;
 import org.json.JSONException;

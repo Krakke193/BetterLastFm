@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.andrey.betterlastfm.R;
-import com.example.andrey.betterlastfm.data.TopArtist;
+import com.example.andrey.betterlastfm.model.TopArtist;
 import com.squareup.picasso.Picasso;
 
 /**

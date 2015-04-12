@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-import com.example.andrey.betterlastfm.data.Friend;
+import com.example.andrey.betterlastfm.model.Friend;
 
 import org.json.JSONArray;
 import org.json.JSONException;

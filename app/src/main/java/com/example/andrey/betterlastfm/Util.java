@@ -13,6 +13,9 @@ import java.security.NoSuchAlgorithmException;
 public class Util {
     private static final String LOG_TAG = Util.class.getSimpleName();
 
+    public static final String SECRET = "5b332291ad05138bd2e441a22262e5b2";
+    public static final String API_KEY = "f445e682840e750fc7c992898e868efb";
+
     public static String md5(String s) {
         final String MD5 = "MD5";
         try {

@@ -55,6 +55,20 @@
             android:authorities="@string/content_authority"
             android:name=".data.RecentTracksProvider" />
 
+        <receiver
+            android:name=".receivers.CommonMusicReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.music.metachanged" />
+                <action android:name="com.android.music.playstatechanged" />
+                <action android:name="com.android.music.playbackcomplete" />
+            </intent-filter>
+
+        </receiver>
+
+        <service android:name=".services.ScrobbleService" />
+
     </application>
 
 </manifest>

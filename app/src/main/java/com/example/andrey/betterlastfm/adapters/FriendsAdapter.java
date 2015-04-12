@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.andrey.betterlastfm.R;
-import com.example.andrey.betterlastfm.data.Friend;
+import com.example.andrey.betterlastfm.model.Friend;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -35,13 +35,21 @@ public class FriendsAdapter extends ArrayAdapter<Friend> {
 
         ((TextView) convertView.findViewById(R.id.tv_friend_name)).setText(friend.friendName);
         ImageView imageView = (ImageView) convertView.findViewById(R.id.iv_friend_icon);
-
-//        new TaskDownloadImage(imageView).execute(friend.friendImageURL);
         Picasso.with(mContext)
                 .load(friend.friendImageURL)
                 .resize(100,100)
                 .centerCrop()
                 .into(imageView);
+
+//        new TaskDownloadImage(imageView).execute(friend.friendImageURL);
+//        if (!friend.friendImageURL.equals("")){
+//            Picasso.with(mContext)
+//                    .load(friend.friendImageURL)
+//                    .resize(100,100)
+//                    .centerCrop()
+//                    .into(imageView);
+//        }
+
 
         return convertView;
     }

@@ -8,14 +8,12 @@ import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.Build;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -29,16 +27,18 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.adapters.ArtistsAdapter;
 import com.example.andrey.betterlastfm.adapters.NavigationListAdapter;
 import com.example.andrey.betterlastfm.adapters.TracksAdapter;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
-import com.example.andrey.betterlastfm.data.RecentTrack;
+import com.example.andrey.betterlastfm.loaders.ScrobbleLoader;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
 
-import com.example.andrey.betterlastfm.data.TopArtist;
+import com.example.andrey.betterlastfm.model.TopArtist;
 import com.example.andrey.betterlastfm.loaders.FetchProfileLoader;
 import com.squareup.picasso.Picasso;
 
@@ -64,6 +64,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     private CardView mCardList;
     private ProfileDbHelper profileDbHelper;
     private SQLiteDatabase db;
+    private SharedPreferences mShrdPrefs;
 
     public static ImageView ivProfilePic;
     public static TextView tvProfileName;
@@ -109,24 +110,33 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     }
 
     public void fillRecentTracks(){
-        Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
 
-        int recentTrackNameIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
-        int recentTrackURLIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
+        try {
+            Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    ProfileContract.RecentTracksEntry._ID + " " + "DESC");
 
-        if (cursor.moveToFirst()){
-            for (int i=0; i<5; i++) {
-                mListAdapter.add(new RecentTrack(
-                        cursor.getString(recentTrackNameIndex),
-                        cursor.getString(recentTrackURLIndex)));
-                cursor.moveToNext();
+            int recentTrackArtistIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
+            int recentTrackNameIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackURLIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
+
+            if (cursor.moveToFirst()){
+                mListAdapter.clear();
+                for (int i=0; i<5; i++) {
+                    mListAdapter.add(new RecentTrack(
+                            cursor.getString(recentTrackArtistIndex) + " - " + cursor.getString(recentTrackNameIndex),
+                            cursor.getString(recentTrackURLIndex)));
+                    cursor.moveToNext();
+                }
+                cursor.close();
             }
-            cursor.close();
+        } catch (Exception e){
+            getLoaderManager().getLoader(0).forceLoad();
+            e.printStackTrace();
         }
+
     }
 
     public void fillTopArtists(){
@@ -145,6 +155,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         int topArtistsPlaycount = cursor.getColumnIndex(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT);
 
         if (cursor.moveToFirst()){
+            mGridAdapter.clear();
             for (int i=0; i<8; i++){
                 mGridAdapter.add(new TopArtist(
                         cursor.getString(topArtistsName),
@@ -162,8 +173,8 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
-        userName = sharedPreferences.getString("username", "ERROR");
+        mShrdPrefs = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
+        userName = mShrdPrefs.getString("username", "ERROR");
 
         ivProfilePic = (ImageView) findViewById(R.id.iv_profile_pic);
         tvProfileName = (TextView) findViewById(R.id.tv_profile_name);
@@ -195,19 +206,19 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
         getLoaderManager().initLoader(0, null, this);
 
-        if (userName.equals(sharedPreferences.getString("username", "ERROR"))){
-            fillHeader();
-            fillRecentTracks();
-            fillTopArtists();
-        } else {
-            profileProgressBar.setVisibility(View.VISIBLE);
-            try {
-                getLoaderManager().getLoader(0).forceLoad();
-            } catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-        }
+//        if (userName.equals(sharedPreferences.getString("username", "ERROR"))){
+//            fillHeader();
+//            fillRecentTracks();
+//            fillTopArtists();
+//        } else {
+//            profileProgressBar.setVisibility(View.VISIBLE);
+//            try {
+//                getLoaderManager().getLoader(0).forceLoad();
+//            } catch (Exception e) {
+//                Log.e(LOG_TAG, e.getMessage(), e);
+//                e.printStackTrace();
+//            }
+//        }
 
         //setListViewHeightBasedOnChildren(listView);
         //setListViewHeightBasedOnChildren(gridView);
@@ -280,6 +291,25 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (userName.equals(mShrdPrefs.getString("username", "ERROR"))){
+            fillHeader();
+            fillRecentTracks();
+            fillTopArtists();
+        } else {
+            profileProgressBar.setVisibility(View.VISIBLE);
+            try {
+                getLoaderManager().getLoader(0).forceLoad();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
         return true;
@@ -291,7 +321,8 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
         if (id == R.id.action_settings) {
             return true;
-        } else if (id == R.id.action_refresh){
+
+        } else if (id == R.id.action_refresh) {
             try {
                 //taskFetchProfile.execute(userName);
                 getLoaderManager().getLoader(0).forceLoad();
@@ -299,6 +330,44 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
+
+        } else if (id == R.id.action_scrobble){
+            ArrayList<String> trackNames = new ArrayList<>();
+            ArrayList<String> trackArtists = new ArrayList<>();
+            ArrayList<String> trackTimestamps = new ArrayList<>();
+
+            Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
+                    null,
+                    ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG + " =" + " 1",
+                    null,
+                    ProfileContract.RecentTracksEntry._ID + " DESC"
+            );
+
+            int recentTrackArtistIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
+            int recentTrackNameIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackTimestamp = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
+
+            if (cursor.moveToFirst()){
+                int i = 0;
+                do{
+                    trackNames.add(cursor.getString(recentTrackNameIndex));
+                    trackArtists.add(cursor.getString(recentTrackArtistIndex));
+                    trackTimestamps.add(cursor.getString(recentTrackTimestamp));
+                } while (cursor.moveToNext());
+
+                ScrobbleLoader scrobbleLoader = new ScrobbleLoader(this,
+                        Util.API_KEY,
+                        trackNames,
+                        trackArtists,
+                        trackTimestamps);
+                scrobbleLoader.forceLoad();
+            } else {
+                Toast.makeText(this, "Nothing to scrobble!", Toast.LENGTH_SHORT).show();
+            }
+
         } else if (id == R.id.action_friends){
             startActivity(new Intent(this,FriendsActivity.class).putExtra("user",userName));
         }
