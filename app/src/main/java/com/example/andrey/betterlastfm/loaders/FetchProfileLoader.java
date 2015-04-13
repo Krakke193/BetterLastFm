@@ -47,10 +47,10 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
     private SQLiteDatabase mDbWrite;
 
     private String[] profileHeaderArray = new String[7];
-    private String[] profileRecentTracksTitle = new String[11];
-    private String[] profileRecentTracksArtist = new String[11];
+    private String[] profileRecentTracksTitle = new String[10];
+    private String[] profileRecentTracksArtist = new String[10];
     //private String[] profileRecentTracksArray = new String[11];
-    private String[] profileRecentTracksUrlArray = new String[11];
+    private String[] profileRecentTracksUrlArray = new String[10];
     private String[] profileTopArtistsArray = new String[8];
     private String[] profileTopArtistsArrayPlaycount = new String[8];
     private String[] profileTopArtistsUrlArray = new String[8];
@@ -176,7 +176,7 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             Log.d(LOG_TAG, "deleted " + deleted + "rows!");
 
 
-            for (int i = 10; i > 0 /* 9*/; i--){
+            for (int i = 9; i >= 0 /* 9*/; i--){
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
                         profileRecentTracksUrlArray[i]);
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST,

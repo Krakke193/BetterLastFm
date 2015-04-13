@@ -56,27 +56,7 @@ public class RecentTracksActivity extends ActionBarActivity {
                         cursor.getString(recentTrackIconURL)
                 ));
 
-//                cursor.moveToNext();
             } while (cursor.moveToNext());
-//            for (int j=0; j<5; j++){
-//                mListAdapter.add(new RecentTrack(null, null));
-//            }
-
-//            for (int i=0; i<10; i++){
-//                mListAdapter.add(new RecentTrack(
-//                        cursor.getString(recentTrackName),
-//                        cursor.getString(recentTrackIconURL)
-//                ));
-//                if (cursor.moveToNext()){
-//
-//                } else {
-//                    for (int j=0; j<5; j++){
-//                        mListAdapter.add(new RecentTrack(null, null));
-//                    }
-//
-//                }
-////                cursor.moveToNext();
-//            }
 
             cursor.close();
 

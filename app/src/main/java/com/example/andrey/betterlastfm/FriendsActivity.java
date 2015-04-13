@@ -1,6 +1,8 @@
 package com.example.andrey.betterlastfm;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,9 +16,10 @@ import com.example.andrey.betterlastfm.adapters.FriendsAdapter;
 import com.example.andrey.betterlastfm.loaders.FriendsLoader;
 
 
-public class FriendsActivity extends ActionBarActivity {
+public class FriendsActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Void>{
 
     private final String LOG_TAG = this.getClass().getSimpleName();
+    private String mUserName;
     private FriendsAdapter mFrienListAdapter;
 
     @Override
@@ -27,12 +30,15 @@ public class FriendsActivity extends ActionBarActivity {
         ListView friendList = (ListView) findViewById(R.id.friend_list);
         mFrienListAdapter = new FriendsAdapter(this, R.layout.item_friends_list);
 
-        String userName = getIntent().getStringExtra("user");
+        mUserName = getIntent().getStringExtra("user");
 
         friendList.setAdapter(mFrienListAdapter);
 
-        FriendsLoader friendsLoader = new FriendsLoader(this, mFrienListAdapter, userName);
-        friendsLoader.forceLoad();
+        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().getLoader(0).forceLoad();
+
+        //FriendsLoader friendsLoader = new FriendsLoader(this, mFrienListAdapter, userName);
+        //friendsLoader.forceLoad();
 
         friendList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -43,6 +49,13 @@ public class FriendsActivity extends ActionBarActivity {
                 Log.d(LOG_TAG, mFrienListAdapter.getItem(position).friendName);
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        getLoaderManager().getLoader(0).stopLoading();
     }
 
     @Override
@@ -65,5 +78,20 @@ public class FriendsActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Void> onCreateLoader(int id, Bundle args) {
+        return new FriendsLoader(this, mFrienListAdapter, mUserName);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Void> loader, Void data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Void> loader) {
+
     }
 }

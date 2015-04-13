@@ -310,6 +310,13 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        getLoaderManager().getLoader(0).stopLoading();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
         return true;
