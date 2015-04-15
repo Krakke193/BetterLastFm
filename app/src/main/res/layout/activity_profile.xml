@@ -16,8 +16,6 @@
             android:id="@+id/toolbar"
             layout="@layout/toolbar" />
 
-
-
         <ScrollView
             android:layout_below="@+id/toolbar"
             android:layout_width="match_parent"
@@ -28,8 +26,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"  >
-
+                android:orientation="vertical">
 
                 <android.support.v7.widget.CardView
                     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -110,18 +107,30 @@
                     android:layout_marginBottom="@dimen/card_between_space_margin">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="400dp"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
                         android:paddingLeft="@dimen/grid_list_padding"
                         android:paddingRight="@dimen/grid_list_padding"
                         android:paddingTop="@dimen/grid_list_padding"
                         android:paddingBottom="@dimen/grid_list_padding"
                         android:orientation="vertical">
 
-                        <ListView
-                            android:id="@+id/list_recent_tracks"
+                        <LinearLayout
+                            android:id="@+id/recent_tracks_linear_layout"
                             android:layout_width="match_parent"
-                            android:layout_height="330dp"/>
+                            android:layout_height="fill_parent"
+
+                            android:orientation="vertical">
+
+                            <!--<ListView-->
+                                <!--android:id="@+id/list_recent_tracks"-->
+
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="fill_parent"/>-->
+
+
+
+                        </LinearLayout>
 
                         <Button
                             android:id="@+id/button_expand_list"
@@ -130,44 +139,145 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"/>
 
+
+
                     </LinearLayout>
+
+
 
                 </android.support.v7.widget.CardView>
 
-                <!--<android.support.v7.widget.CardView-->
-                    <!--xmlns:card_view="http://schemas.android.com/apk/res-auto"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="fill_parent"-->
-                    <!--android:paddingLeft="@dimen/grid_list_padding"-->
-                    <!--android:paddingRight="@dimen/grid_list_padding"-->
-                    <!--android:paddingTop="@dimen/grid_list_padding"-->
-                    <!--android:paddingBottom="@dimen/grid_list_padding">-->
+                <android.support.v7.widget.CardView
+                    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                    android:layout_width="match_parent"
+                    android:layout_height="fill_parent">
+
+                    <LinearLayout
+                        android:id="@+id/artists_linear_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="fill_parent"
+                        android:paddingLeft="@dimen/grid_list_padding"
+                        android:paddingRight="@dimen/grid_list_padding"
+                        android:paddingTop="@dimen/grid_list_padding"
+                        android:paddingBottom="@dimen/grid_list_padding"
+                        android:orientation="vertical"/>
+
+
+
+
+
+                    <!--<GridLayout-->
+                        <!--android:id="@+id/top_artists_grid_layout"-->
+                        <!--android:columnCount="3"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="fill_parent">-->
+
+                    <!--</GridLayout>-->
+
+
+
+
+
+
+
+
+
+                    <!--<FrameLayout-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content">-->
+
+                        <!--<GridView-->
+                            <!--android:numColumns="3"-->
+                            <!--android:id="@+id/grid_top_artists"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content">-->
+                        <!--</GridView>-->
+
+                    <!--</FrameLayout>-->
+
+                </android.support.v7.widget.CardView>
+
+            <LinearLayout
+                android:id="@+id/temp_linear_layout"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/list_item"
+                android:minHeight="?android:attr/listPreferredItemHeight">
+
+                <ImageView
+                    android:id="@+id/artists_list_imageview"
+                    android:layout_width="@dimen/list_item"
+                    android:layout_height="45dp"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:src="@drawable/female"/>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="0dp"
+                        android:layout_gravity="bottom"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/artists_list_name_textview"
+                            android:text="test text text"
+                            android:layout_weight="5"
+                            android:layout_width="0dp"
+                            android:layout_height="fill_parent"
+                            android:paddingLeft="@dimen/grid_list_padding"
+                            android:gravity="bottom"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/artists_list_plays_textview"
+                            android:text="test text text"
+                            android:layout_weight="2"
+                            android:layout_width="0dp"
+                            android:layout_height="fill_parent"
+                            android:gravity="bottom"
+                            android:textSize="15sp" />
+
+                    </LinearLayout>
 
                     <FrameLayout
+                        android:id="@+id/artists_frame_imageview_container"
+                        android:layout_weight="1"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="0dp">
 
-                        <GridView
-                            android:numColumns="3"
-                            android:id="@+id/grid_top_artists"
+                        <ImageView
+                            android:id="@+id/artists_relativebar_imageview"
+
+
                             android:layout_width="match_parent"
-                            android:layout_height="600dp">
-                        </GridView>
-
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:paddingLeft="@dimen/grid_list_padding"
+                            android:paddingRight="@dimen/grid_list_padding"
+                            android:background="@color/material_blue_grey_800"/>
                     </FrameLayout>
 
-                <!--</android.support.v7.widget.CardView>-->
 
+
+                    </LinearLayout>
+
+                </LinearLayout>
             </LinearLayout>
 
         </ScrollView>
 
-        <ProgressBar
-            android:id="@+id/profile_progress_bar"
+        <!--<ProgressBar-->
+            <!--android:id="@+id/profile_progress_bar"-->
 
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible"/>
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:visibility="invisible"/>-->
 
     </RelativeLayout>
 

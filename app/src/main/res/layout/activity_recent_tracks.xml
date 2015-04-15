@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:layout_margin="16dp"
+
         android:transitionName="listCard"
         android:layout_marginBottom="@dimen/card_between_space_margin">
 
@@ -24,7 +25,7 @@
 
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-
+            android:padding="@dimen/grid_list_padding"
             android:orientation="vertical">
 
 

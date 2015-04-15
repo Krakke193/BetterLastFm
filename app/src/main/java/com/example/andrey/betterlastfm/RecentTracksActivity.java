@@ -1,16 +1,23 @@
 package com.example.andrey.betterlastfm;
 
+import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.adapters.TracksAdapter;
 import com.example.andrey.betterlastfm.data.ProfileContract;
+import com.example.andrey.betterlastfm.data.ProfileDbHelper;
 import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
 import com.example.andrey.betterlastfm.loaders.RecentTracksLoader;
@@ -27,12 +34,27 @@ public class RecentTracksActivity extends ActionBarActivity {
         setContentView(R.layout.activity_recent_tracks);
 
         Intent intent = getIntent();
-        ArrayList<String> passDataArr = intent.getStringArrayListExtra("passKey");
+        //ArrayList<String> passDataArr = intent.getStringArrayListExtra("passKey");
 
         ListView mListView = (ListView) this.findViewById(R.id.list_recent_tracks);
         mListView.setScrollContainer(false);
-        TracksAdapter mListAdapter = new TracksAdapter(this,R.layout.item_recent_tracks_list);
+        final TracksAdapter mListAdapter = new TracksAdapter(this,R.layout.item_recent_tracks_list);
         mListView.setAdapter(mListAdapter);
+
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                int iddqd = parent.getAdapter().getCount() - position;
+
+                Uri uri = ContentUris.withAppendedId(RecentTracksProvider.TRACKS_CONTENT_URI, iddqd);
+                int cnt = getContentResolver().delete(uri, "_id = " + Integer.toString(iddqd), null);
+                Toast.makeText(getApplicationContext(), "Deleted: " + cnt + "row, on " + Integer.toString(iddqd) + " id", Toast.LENGTH_SHORT).show();
+
+                mListAdapter.remove((RecentTrack) parent.getAdapter().getItem(position));
+
+                return true;
+            }
+        });
 
         if (ProfileActivity.userName.equals("se0ko")){
             Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
@@ -71,19 +93,14 @@ public class RecentTracksActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_recent_tracks, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }

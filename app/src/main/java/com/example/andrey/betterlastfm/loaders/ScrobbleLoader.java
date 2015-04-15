@@ -60,7 +60,6 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
 
     @Override
     public Void loadInBackground() {
-
         if (mArtists.size() > 10){
             ArrayList<String> listArtists = new ArrayList<>();
             ArrayList<String> listTracks = new ArrayList<>();
@@ -82,8 +81,6 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
             performScrobble(null, null, null);
 
         }
-
-
 
         return null;
     }
@@ -112,6 +109,8 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
         String format = "json";
         String method = "track.scrobble";
 
+        String tmpStringForMD5;
+
         BufferedReader reader = null;
         HttpPost httpPost = new HttpPost(BASE_URL + "?" + FORMAT + "=" + format);
         HttpClient httpclient = new DefaultHttpClient();
@@ -119,8 +118,6 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
         SharedPreferences shrdPrfs = mContext
                 .getSharedPreferences("com.example.andrey.betterlastfm",Context.MODE_PRIVATE);
         String sessionKey = shrdPrfs.getString("session_key", "ERROR");
-
-        String tmpStringForMD5 = "";
 
         for (int i=0; i<artists.size(); i++){
             tmpArtistsForMD5 += "artist" + "[" + Integer.toString(i) + "]" + artists.get(i);
@@ -197,7 +194,6 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
                 return;
 
             String jsonStr = buffer.toString();
-
 
             errFlag = isErrorGetFromJson(jsonStr);
 

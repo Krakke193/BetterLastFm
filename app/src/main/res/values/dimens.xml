@@ -8,6 +8,7 @@
 
     <dimen name="header_margin">8dp</dimen>
     <dimen name="grid_list_padding">5dp</dimen>
+    <dimen name="nav_drawer_width">320dp</dimen>
 
     <dimen name="list_item">45dp</dimen>
     <dimen name="iv_width_grid">150dp</dimen>

@@ -1,6 +1,7 @@
 package com.example.andrey.betterlastfm.adapters;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,27 +30,18 @@ public class FriendsAdapter extends ArrayAdapter<Friend> {
         Friend friend = getItem(position);
 
         View viewHolder = null;
-        if (convertView == null) {
+        if (convertView == null)
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_friends_list, null);
-        }
 
         ((TextView) convertView.findViewById(R.id.tv_friend_name)).setText(friend.friendName);
         ImageView imageView = (ImageView) convertView.findViewById(R.id.iv_friend_icon);
-        Picasso.with(mContext)
-                .load(friend.friendImageURL)
-                .resize(100,100)
-                .centerCrop()
-                .into(imageView);
 
-//        new TaskDownloadImage(imageView).execute(friend.friendImageURL);
-//        if (!friend.friendImageURL.equals("")){
-//            Picasso.with(mContext)
-//                    .load(friend.friendImageURL)
-//                    .resize(100,100)
-//                    .centerCrop()
-//                    .into(imageView);
-//        }
-
+        if (!TextUtils.isEmpty(friend.friendImageURL))
+            Picasso.with(mContext)
+                    .load(friend.friendImageURL)
+                    .resize(100,100)
+                    .centerCrop()
+                    .into(imageView);
 
         return convertView;
     }

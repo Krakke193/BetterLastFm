@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.w3c.dom.Text;
+
 /**
  * Created by Andrey on 07.04.2015.
  */
@@ -45,7 +47,7 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Log.d(LOG_TAG, "Content provider has been created!");
+        //Log.d(LOG_TAG, "Content provider has been created!");
         mProfileDbHelper = new ProfileDbHelper(getContext());
         return true;
     }
@@ -53,14 +55,13 @@ public class RecentTracksProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
-        Log.d(LOG_TAG, "query, " + uri.toString());
-
+        //Log.d(LOG_TAG, "query, " + uri.toString());
         switch (uriMatcher.match(uri)){
             case URI_TRACKS:
-                Log.d(LOG_TAG, "URI_TRACKS");
+                //Log.d(LOG_TAG, "URI_TRACKS");
                 break;
             case URI_TRACKS_ID:
-                Log.d(LOG_TAG, "URI_TRACKS_ID");
+                //Log.d(LOG_TAG, "URI_TRACKS_ID");
                 String id = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
                     selection = ProfileContract.RecentTracksEntry._ID + " = " + id;
@@ -89,7 +90,7 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        Log.d(LOG_TAG, "getType, " + uri.toString());
+        //Log.d(LOG_TAG, "getType, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_TRACKS:
                 return TRACKS_CONTENT_TYPE;
@@ -101,8 +102,7 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        Log.d(LOG_TAG, "insert, " + uri.toString());
-
+        //Log.d(LOG_TAG, "insert, " + uri.toString());
         if (uriMatcher.match(uri) != URI_TRACKS)
             throw new IllegalArgumentException("Wrong URI: " + uri);
 
@@ -119,17 +119,16 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        Log.d(LOG_TAG, "delete, " + uri.toString());
-
+        //Log.d(LOG_TAG, "delete, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_TRACKS:
-                Log.d(LOG_TAG, "URI_CONTACTS");
+                //Log.d(LOG_TAG, "URI_CONTACTS");
                 break;
             case URI_TRACKS_ID:
                 String id = uri.getLastPathSegment();
-                Log.d(LOG_TAG, "URI_CONTACTS_ID, " + id);
+                //Log.d(LOG_TAG, "URI_CONTACTS_ID, " + id);
                 if (TextUtils.isEmpty(selection)) {
-                    selection = ProfileContract.RecentTracksEntry._ID + " = " + id;
+                    selection = ProfileContract.RecentTracksEntry._ID  + " = " + id;
                 } else {
                     selection = selection +
                             " AND " + ProfileContract.RecentTracksEntry._ID + " = " + id;
@@ -139,7 +138,13 @@ public class RecentTracksProvider extends ContentProvider {
                 throw new IllegalArgumentException("Wrong URI: " + uri);
         }
         db = mProfileDbHelper.getWritableDatabase();
-        int cnt = db.delete(ProfileContract.RecentTracksEntry.TABLE_NAME, selection, selectionArgs);
+
+        if (!TextUtils.isEmpty(selection)){
+            Log.d(LOG_TAG, selection);
+            Log.d(LOG_TAG, uri.toString());
+        }
+
+        int cnt = db.delete(ProfileContract.RecentTracksEntry.TABLE_NAME, selection, null);
         getContext().getContentResolver().notifyChange(uri, null);
         return cnt;
     }

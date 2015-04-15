@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Created by Andrey on 08.04.2015.
@@ -29,9 +30,8 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
     private ArrayAdapter<Friend> mArrayAdapter;
     private String mUserName;
 
-    //private String friendsJsonStr = null;
-    private String[] friendsArray = new String[10];
-    private String[] friendsImageUrlArray = new String[10];
+    private ArrayList<String> mFriendsArray = new ArrayList<>();
+    private ArrayList<String> mFriendsImageUrlArray = new ArrayList<>();
 
     public FriendsLoader(Context context, ArrayAdapter<Friend> arrayAdapter, String userName){
         super(context);
@@ -75,7 +75,7 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
             urlConnection.connect();
 
             InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null)
                 return null;
             reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -114,7 +114,6 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
     }
 
     private Void getFriendsFromJson(String friendsJsonStr) throws JSONException{
-
         final String NAME = "name";
 
         try {
@@ -124,7 +123,7 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
 
             for (int i=0; i<userJsonArray.length(); i++){
 
-                friendsArray[i] = userJsonArray.getJSONObject(i).getString(NAME);
+                mFriendsArray.add(userJsonArray.getJSONObject(i).getString(NAME));
 
                 JSONArray imageJson = userJsonArray.getJSONObject(i).getJSONArray("image");
 
@@ -135,7 +134,7 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
                     }
                 }
 
-                friendsImageUrlArray[i] = imageURL;
+                mFriendsImageUrlArray.add(imageURL);
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -150,8 +149,8 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
         super.deliverResult(data);
 
         mArrayAdapter.clear();
-        for (int i=0; i<friendsArray.length; i++){
-            mArrayAdapter.add(new Friend(friendsArray[i], friendsImageUrlArray[i]));
+        for (int i=0; i<mFriendsArray.size(); i++){
+            mArrayAdapter.add(new Friend(mFriendsArray.get(i), mFriendsImageUrlArray.get(i)));
         }
     }
 }

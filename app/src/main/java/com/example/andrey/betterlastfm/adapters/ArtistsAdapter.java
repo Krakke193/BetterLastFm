@@ -1,6 +1,7 @@
 package com.example.andrey.betterlastfm.adapters;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,20 +29,15 @@ public class ArtistsAdapter extends ArrayAdapter<TopArtist> {
         TopArtist topArtist = getItem(position);
 
         View viewHolder = null;
-        if (convertView == null) {
+        if (convertView == null)
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_top_artists_grid, null);
-
-
-        }
 
         ((TextView) convertView.findViewById(R.id.tv_artists_name_grid)).setText(topArtist.artistInfo);
         ((TextView) convertView.findViewById(R.id.tv_artists_playcount_grid)).setText(topArtist.artistPlaycount);
         ImageView imageView = (ImageView) convertView.findViewById(R.id.iv_grid);
 
-        //new TaskDownloadImage(imageView).execute(topArtist.artistImageURL);
-        //new DownloadImageLoader(context, imageView, topArtist.artistImageURL).forceLoad();
-        //Picasso.with(mContext).setIndicatorsEnabled(true);
-        Picasso.with(mContext).load(topArtist.artistImageURL).resize(220,220).centerCrop().into(imageView);
+        if (!TextUtils.isEmpty(topArtist.artistImageURL))
+            Picasso.with(mContext).load(topArtist.artistImageURL).resize(220,220).centerCrop().into(imageView);
 
         return convertView;
     }

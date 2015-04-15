@@ -16,27 +16,15 @@ public class CommonMusicReceiver extends BroadcastReceiver {
     private static boolean flag = false;
     private static String storedTrack = "";
 
-    public static final String PLAYSTATE_CHANGED = "com.android.music.playstatechanged";
-    public static final String TOGGLEPAUSE_ACTION = "com.android.music.musicservicecommand.togglepause";
-    public static final String PAUSE_ACTION = "com.android.music.musicservicecommand.pause";
-    public static final String PREVIOUS_ACTION = "com.android.music.musicservicecommand.previous";
-    public static final String NEXT_ACTION = "com.android.music.musicservicecommand.next";
     public static final String EXTRA_TRACK_NAME = "EXTRA_TACK_NAME";
     public static final String EXTRA_ARTIST_NAME = "EXTRA_ARTIST_NAME";
     public static final String EXTRA_TRACK_DURATION = "EXTRA_TACK_DURATION";
 
     @Override
     public void onReceive(Context context, Intent originalIntent) {
-
-
-
-
         if (!storedTrack.equals(originalIntent.getStringExtra("track"))){
-
-
             Log.d(LOG_TAG, "playing");
             Log.d(LOG_TAG, originalIntent.getAction());
-
             Log.d(LOG_TAG, "Player name: " + originalIntent.getAction().substring(0, originalIntent.getAction().lastIndexOf('.')));
             Log.d(LOG_TAG, "Track name: " + originalIntent.getStringExtra("track"));
             Log.d(LOG_TAG, "Artist name: " + originalIntent.getStringExtra("artist"));
@@ -49,14 +37,8 @@ public class CommonMusicReceiver extends BroadcastReceiver {
             service.putExtra(EXTRA_TRACK_DURATION, originalIntent.getLongExtra("duration", 0L));
             context.startService(service);
 
-            //service.setAction(ScrobbleService.START_PLAYING);
-
-
             flag = true;
             storedTrack = originalIntent.getStringExtra("track");
         }
-
-
-
     }
 }

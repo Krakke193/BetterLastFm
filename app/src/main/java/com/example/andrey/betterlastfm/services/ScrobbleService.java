@@ -19,7 +19,11 @@ import java.sql.Timestamp;
 /**
  * Created by Andrey on 11.04.2015.
  */
-public class ScrobbleService extends Service {
+
+/**
+ * TODO: Change to the intent service!
+ */
+public class ScrobbleService extends IntentService {
     private final String LOG_TAG = ScrobbleService.class.getSimpleName();
 
     private final String DELETE_IN_TRACK = "Track name: ";
@@ -28,13 +32,12 @@ public class ScrobbleService extends Service {
     public static final String START_PLAYING = "com.example.andrey.betterlastfm.services.action.START_PLAYING";
     public static final String STOP_PLAYING = "com.example.andrey.betterlastfm.services.action.STOP_PLAYING";
 
-
-//    public ScrobbleService(){
-//        super("ScrobblingService");
-//    }
+    public ScrobbleService(){
+        super("ScrobblingService");
+    }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             String trackName = intent.getStringExtra(CommonMusicReceiver.EXTRA_TRACK_NAME);
             String artistName = intent.getStringExtra(CommonMusicReceiver.EXTRA_ARTIST_NAME);
@@ -62,9 +65,14 @@ public class ScrobbleService extends Service {
             //getApplicationContext().getContentResolver().delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
             getApplicationContext().getContentResolver().insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
         }
-
-        return Service.START_STICKY;
     }
+
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
+//
+//
+//        return Service.START_STICKY;
+//    }
 
     @Override
     public IBinder onBind(Intent intent) {

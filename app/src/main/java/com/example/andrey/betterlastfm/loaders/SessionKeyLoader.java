@@ -57,16 +57,12 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
     public String loadInBackground() {
         final String BASE_URL = "https://ws.audioscrobbler.com/2.0/?";
         final String METHOD = "method";
-        final String USER = "user";
-        final String PASSWORD = "password";
-        final String API_KEY = "api_key";
-        final String API_SIG = "api_sig";
         final String FORMAT = "format";
 
         String format = "json";
         String method = "auth.getMobileSession";
 
-        BufferedReader reader = null;
+        BufferedReader reader;
         HttpPost httpPost = new HttpPost(BASE_URL + METHOD + "=" + method + "&"
             + FORMAT + "=" + format);
         HttpClient httpclient = new DefaultHttpClient();
@@ -83,7 +79,7 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
             HttpResponse response = httpclient.execute(httpPost);
 
             InputStream inputStream = response.getEntity().getContent();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null)
                 return null;
             reader = new BufferedReader(new InputStreamReader(inputStream));

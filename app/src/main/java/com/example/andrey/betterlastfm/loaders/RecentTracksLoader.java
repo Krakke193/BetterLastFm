@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Created by Andrey on 08.04.2015.
@@ -29,8 +30,8 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
     private ArrayAdapter<RecentTrack> mListAdapter;
     private String mUserName;
 
-    private String[] profileRecentTracksArray = new String[11];
-    private String[] profileRecentTracksUrlArray = new String[11];
+    private ArrayList<String> mProfileRecentTracksArray = new ArrayList<>();
+    private ArrayList<String> mProfileRecentTracksArrayURL = new ArrayList<>();
 
     public RecentTracksLoader(Context context,
                               ArrayAdapter<RecentTrack> listAdapter, String userName){
@@ -38,12 +39,11 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
         this.mContext = context;
         this.mListAdapter = listAdapter;
         this.mUserName = userName;
-
     }
 
     @Override
     public Void loadInBackground() {
-        String profileRecentTracksJsonStr = null;
+        String profileRecentTracksJsonStr;
 
         String user = mUserName;
         String format = "json";
@@ -76,7 +76,7 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
             urlConnection.connect();
 
             InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null)
                 return null;
             reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -116,8 +116,7 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
         return null;
     }
 
-    private String[] getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
-
+    private void getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
         final String ARTIST = "#text";
         final String NAME = "name";
 
@@ -127,8 +126,12 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
             JSONArray recentTracksArr = recentTracksJson.getJSONArray("track");
 
             for (int i=0; i<recentTracksArr.length(); i++){
-                profileRecentTracksArray[i] = recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST)
-                        + " - " + recentTracksArr.getJSONObject(i).getString(NAME);
+                mProfileRecentTracksArray.add(recentTracksArr
+                        .getJSONObject(i)
+                        .getJSONObject("artist")
+                        .getString(ARTIST) +
+                        " - " +
+                        recentTracksArr.getJSONObject(i).getString(NAME));
 
                 JSONArray imageJson = recentTracksArr.getJSONObject(i).getJSONArray("image");
 
@@ -139,14 +142,12 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
                     }
                 }
 
-                profileRecentTracksUrlArray[i] = imageURL;
+                mProfileRecentTracksArrayURL.add(imageURL);
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
-
-        return profileRecentTracksArray;
     }
 
     @Override
@@ -154,10 +155,11 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
         super.deliverResult(data);
 
         mListAdapter.clear();
-        for(int i=0; i<10 /*profileRecentTracksArray.length*/; i++) {
+
+        for(int i=0; i<10; i++) {
             mListAdapter.add(new RecentTrack(
-                    profileRecentTracksArray[i],
-                    profileRecentTracksUrlArray[i]
+                    mProfileRecentTracksArray.get(i),
+                    mProfileRecentTracksArrayURL.get(i)
             ));
         }
     }

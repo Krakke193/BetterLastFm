@@ -12,15 +12,9 @@ public class ProfileContract {
     public static abstract class ProfileEntry implements BaseColumns{
         public static final String TABLE_NAME = "profile";
         public static final String USER_ID = "user_id";
-        public static final String COLUMN_HEADER_ID = "header_id"; // Ссылка на таблицу с инфой профиля!!
-        public static final String COLUMN_RECENT_TRACKS_ID = "recent_tracks_id"; // Сслыка на последние композиции!
-        public static final String COLUMN_TOP_ARTISTS_ID = "top_artists_id"; // Ссылка на
-
-        /**
-         * TODO: Three public static final String fields for three inner data bases:
-         * TODO: headerTable, recentTracks, topArtists
-         */
-
+        public static final String COLUMN_HEADER_ID = "header_id";
+        public static final String COLUMN_RECENT_TRACKS_ID = "recent_tracks_id";
+        public static final String COLUMN_TOP_ARTISTS_ID = "top_artists_id";
     }
 
     public static abstract class HeaderEntry implements BaseColumns{

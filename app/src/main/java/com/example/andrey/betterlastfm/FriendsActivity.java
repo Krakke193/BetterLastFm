@@ -37,9 +37,6 @@ public class FriendsActivity extends ActionBarActivity implements LoaderManager.
         getLoaderManager().initLoader(0, null, this);
         getLoaderManager().getLoader(0).forceLoad();
 
-        //FriendsLoader friendsLoader = new FriendsLoader(this, mFrienListAdapter, userName);
-        //friendsLoader.forceLoad();
-
         friendList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

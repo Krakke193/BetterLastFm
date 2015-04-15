@@ -5,12 +5,18 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.andrey.betterlastfm.ProfileActivity;
 import com.example.andrey.betterlastfm.R;
+import com.example.andrey.betterlastfm.Util;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
 import com.example.andrey.betterlastfm.model.RecentTrack;
@@ -28,16 +34,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Created by Андрей on 01.04.2015.
  */
-public class FetchProfileLoader extends AsyncTaskLoader<Void> {
-
-    private static final String LOG_TAG = FetchProfileLoader.class.getSimpleName();
-
-    final Uri CONTACT_URI = Uri
-            .parse("content://com.example.andrey.betterlastfm/tracks");
+public class ProfileLoader extends AsyncTaskLoader<Void> {
+    private static final String LOG_TAG = ProfileLoader.class.getSimpleName();
 
     private ArrayAdapter<RecentTrack> mListAdapter;
     private ArrayAdapter<TopArtist> mGridAdapter;
@@ -47,16 +50,21 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
     private SQLiteDatabase mDbWrite;
 
     private String[] profileHeaderArray = new String[7];
+
     private String[] profileRecentTracksTitle = new String[10];
     private String[] profileRecentTracksArtist = new String[10];
-    //private String[] profileRecentTracksArray = new String[11];
     private String[] profileRecentTracksUrlArray = new String[10];
-    private String[] profileTopArtistsArray = new String[8];
-    private String[] profileTopArtistsArrayPlaycount = new String[8];
-    private String[] profileTopArtistsUrlArray = new String[8];
 
-    public FetchProfileLoader(Context context, ArrayAdapter<RecentTrack> listAdapter,
-                              ArrayAdapter<TopArtist> gridAdapter, String userName){
+    private ArrayList<String> mProfileTopArtistsNames = new ArrayList<>();
+    private ArrayList<String> mProfileTopArtistsPlays = new ArrayList<>();
+    private ArrayList<String> mProfileTopArtistsPicURL = new ArrayList<>();
+
+//    private String[] profileTopArtistsArray = new String[8];
+//    private String[] profileTopArtistsArrayPlaycount = new String[8];
+//    private String[] profileTopArtistsUrlArray = new String[8];
+
+    public ProfileLoader(Context context, ArrayAdapter<RecentTrack> listAdapter,
+                         ArrayAdapter<TopArtist> gridAdapter, String userName){
         super(context);
         this.mContext = context;
         this.mListAdapter = listAdapter;
@@ -69,7 +77,6 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
     /** Parsing JSON data for profile info and inserting database values! */
     private String[] getProfileInfoFromJson(String profileJsonStr) throws JSONException{
-
         final String IMAGE_URL = "image";
         final String PROFILE_NAME = "name";
         final String REAL_NAME = "realname";
@@ -102,10 +109,9 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             e.printStackTrace();
         }
 
-        /**
-         * Database insertion!
-         */
-        int counter = 0;
+        //Database insertion!
+
+        //int counter = 0;
         if (mUserName.equals("se0ko")){
 
             mDbWrite.delete(
@@ -123,15 +129,14 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_PLAYCOUNT, profileHeaderArray[5]);
             headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_REGISTRY_DATE, profileHeaderArray[6]);
             mDbWrite.insert(ProfileContract.HeaderEntry.TABLE_NAME, null, headerValues);
-            counter++;
+            //counter++;
         }
-        Log.d(LOG_TAG, "Inserted " + Integer.toString(counter) + " header notes");
+        //Log.d(LOG_TAG, "Inserted " + Integer.toString(counter) + " header notes");
         return profileHeaderArray;
     }
 
     /** Parsing JSON data for recent tracks info and inserting database values! */
     private String[] getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
-
         final String ARTIST = "#text";
         final String NAME = "name";
 
@@ -140,13 +145,9 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             JSONObject recentTracksJson = tracksJson.getJSONObject("recenttracks");
             JSONArray recentTracksArr = recentTracksJson.getJSONArray("track");
 
-            for (int i=0; i<recentTracksArr.length(); i++){
+            for (int i=0; i<profileRecentTracksTitle.length; i++){
                 profileRecentTracksArtist[i] = recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST);
                 profileRecentTracksTitle[i] = recentTracksArr.getJSONObject(i).getString(NAME);
-
-
-//                profileRecentTracksArray[i] = recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST)
-//                        + " - " + recentTracksArr.getJSONObject(i).getString(NAME);
 
                 JSONArray imageJson = recentTracksArr.getJSONObject(i).getJSONArray("image");
 
@@ -164,45 +165,37 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             e.printStackTrace();
         }
 
-        /**
-         * Database insertion!
-         */
+        //Database insertion!
 
         if (mUserName.equals("se0ko")){
             ContentValues recentTrackValues = new ContentValues();
 
-            int deleted = mContext.getContentResolver()
+            mContext.getContentResolver()
                     .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
-            Log.d(LOG_TAG, "deleted " + deleted + "rows!");
+            //Log.d(LOG_TAG, "deleted " + deleted + "rows!");
 
 
-            for (int i = 9; i >= 0 /* 9*/; i--){
+            for (int i = 9; i >= 0; i--){
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
                         profileRecentTracksUrlArray[i]);
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST,
                         profileRecentTracksArtist[i]);
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
                         profileRecentTracksTitle[i]);
-                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP,
-                        "");
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP, "");
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
 
-                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG,
-                        0);
-
-                Uri newUri = mContext.getContentResolver()
+                mContext.getContentResolver()
                         .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
 
-                Log.d(LOG_TAG, "insert, result Uri : " + newUri.toString());
-
+                //Log.d(LOG_TAG, "insert, result Uri : " + newUri.toString());
             }
-
         }
         return profileRecentTracksUrlArray;
     }
 
     /** Parsing JSON data for top artists and inserting database values! */
-    private String[] getTopArtistsFromJson (String topArtistsJsonStr) throws JSONException{
-
+    private void getTopArtistsFromJson (String topArtistsJsonStr) throws JSONException{
         final String ARTIST_NAME = "name";
         final String PLAYCOUNT = "playcount";
 
@@ -212,8 +205,8 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             JSONArray topArtistsArr = topArtistsJson.getJSONArray("artist");
 
             for (int i=0; i<topArtistsArr.length(); i++){
-                profileTopArtistsArray[i] = topArtistsArr.getJSONObject(i).getString(ARTIST_NAME);
-                profileTopArtistsArrayPlaycount[i] = topArtistsArr.getJSONObject(i).getString(PLAYCOUNT) + "plays";
+                mProfileTopArtistsNames.add(topArtistsArr.getJSONObject(i).getString(ARTIST_NAME));
+                mProfileTopArtistsPlays.add(topArtistsArr.getJSONObject(i).getString(PLAYCOUNT) + "plays");
 
                 JSONArray imageJson = topArtistsArr.getJSONObject(i).getJSONArray("image");
 
@@ -224,19 +217,17 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                     }
                 }
 
-                profileTopArtistsUrlArray[i] = imageURL;
+                mProfileTopArtistsPicURL.add(imageURL);
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
 
-        /**
-         * Database insertion!
-         */
+        //Database insertion!
+
         int counter = 0;
         if (mUserName.equals("se0ko")){
-
             mDbWrite.delete(
                     ProfileContract.TopArtistsEntry.TABLE_NAME,
                     null,
@@ -245,10 +236,10 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
 
             ContentValues topArtistsValues = new ContentValues();
 
-            for (int i = 0; i < profileTopArtistsArray.length; i++){
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_ICON_URL, profileTopArtistsUrlArray[i]);
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_NAME, profileTopArtistsArray[i]);
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT, profileTopArtistsArrayPlaycount[i]);
+            for (int i = 0; i < mProfileTopArtistsNames.size(); i++){
+                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_ICON_URL, mProfileTopArtistsPicURL.get(i));
+                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_NAME, mProfileTopArtistsNames.get(i));
+                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT, mProfileTopArtistsPlays.get(i));
 
                 mDbWrite.insert(
                         ProfileContract.TopArtistsEntry.TABLE_NAME,
@@ -257,22 +248,20 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                 );
                 counter++;
             }
-            Log.d(LOG_TAG, "Inserted " + counter + " artists rows");
+            //Log.d(LOG_TAG, "Inserted " + counter + " artists rows");
         }
-
-        return profileTopArtistsUrlArray;
     }
 
     @Override
     public Void loadInBackground() {
-        String profileJsonStr = null;
-        String profileRecentTracksJsonStr = null;
-        String profileTopArtistsJsonStr = null;
+        String profileJsonStr;
+        String profileRecentTracksJsonStr;
+        String profileTopArtistsJsonStr;
 
         String user = mUserName;
         String format = "json";
         String apiKey = "90167bec56ea0d23c263e7a59a395eb2";
-        String limit = "8";
+        String limit = "9";
 
         String methodTypeHeaderInfo = "user.getinfo";
         String methodTypeRecentTracks = "user.getrecenttracks";
@@ -284,7 +273,8 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
         if (mUserName.equals(""))
             return null;
 
-        /** Getting header info!*/
+        //Getting header info!
+
         try {
             final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
             final String METHOD_TYPE = "method";
@@ -305,7 +295,7 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             urlConnection.connect();
 
             InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null)
                 return null;
             reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -342,7 +332,8 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             }
         }
 
-        /** Getting recent tracks!*/
+        //Getting recent tracks!
+
         try {
             final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
             final String METHOD_TYPE = "method";
@@ -362,7 +353,7 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             urlConnection.connect();
 
             InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null)
                 return null;
             reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -399,7 +390,8 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             }
         }
 
-        /** Getting top artists! */
+        // Getting top artists!
+
         try {
             final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
             final String METHOD_TYPE = "method";
@@ -421,7 +413,7 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
             urlConnection.connect();
 
             InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             if (inputStream == null)
                 return null;
             reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -481,23 +473,67 @@ public class FetchProfileLoader extends AsyncTaskLoader<Void> {
                 profileHeaderArray[6]
         );
 
-        mListAdapter.clear();
-        for(int i=0; i<5 /*profileRecentTracksArray.length*/; i++) {
-            mListAdapter.add(new RecentTrack(
-                    profileRecentTracksArtist[i] + " - " + profileRecentTracksTitle[i],
-                    profileRecentTracksUrlArray[i]
-            ));
+        ProfileActivity.tracksListLinearLayout.removeAllViews();
+        for(int i=0; i<5; i++) {
+            View header = LayoutInflater.from(mContext).inflate(R.layout.item_recent_tracks_list, null);
+            ((TextView) header.findViewById(R.id.list_textview))
+                    .setText(profileRecentTracksArtist[i] + " - " + profileRecentTracksTitle[i]);
+
+
+            ImageView imageView = (ImageView) header.findViewById(R.id.list_imageview);
+
+            if (!TextUtils.isEmpty(profileRecentTracksUrlArray[i]))
+                Picasso.with(mContext).load(profileRecentTracksUrlArray[i]).into(imageView);
+
+            ProfileActivity.tracksListLinearLayout.addView(header);
         }
+
+
+//        mListAdapter.clear();
+//        for(int i=0; i<5; i++) {
+//            mListAdapter.add(new RecentTrack(
+//                    profileRecentTracksArtist[i] + " - " + profileRecentTracksTitle[i],
+//                    profileRecentTracksUrlArray[i]
+//            ));
+//        }
 
         mGridAdapter.clear();
-        for (int i=0; i<profileTopArtistsArray.length; i++){
-            mGridAdapter.add(new TopArtist(
-                    profileTopArtistsArray[i],
-                    profileTopArtistsArrayPlaycount[i],
-                    profileTopArtistsUrlArray[i]
-            ));
+        ProfileActivity.artistsListLinearLayout.removeAllViews();
+        int fullPlays = Integer.parseInt(mProfileTopArtistsPlays.get(0).replaceAll("plays",""));
+        for (int i=0; i<mProfileTopArtistsNames.size(); i++){
+
+            View view = LayoutInflater.from(mContext).inflate(R.layout.item_artists_list, null);
+
+            ImageView imageView = (ImageView) view.findViewById(R.id.artists_list_imageview);
+            ((TextView) view.findViewById(R.id.artists_list_name_textview))
+                    .setText(mProfileTopArtistsNames.get(i));
+            ((TextView) view.findViewById(R.id.artists_list_plays_textview))
+                    .setText(mProfileTopArtistsPlays.get(i));
+
+            float percentage = (Integer.parseInt(mProfileTopArtistsPlays.get(i).replaceAll("plays","")) * 100 / fullPlays);
+            Log.d(LOG_TAG, Float.toString(percentage));
+
+            ImageView relativeBar = (ImageView) view.findViewById(R.id.artists_relativebar_imageview);
+
+            ViewGroup.LayoutParams params = relativeBar.getLayoutParams();
+            //params.width = (int) ((percentage * fullWidth)) / 100;
+            params.width = (int) ((ProfileActivity.fullWidth * percentage) / 100);
+            relativeBar.setLayoutParams(params);
+
+            if (!TextUtils.isEmpty(mProfileTopArtistsPicURL.get(i)))
+                Picasso.with(mContext).load(mProfileTopArtistsPicURL.get(i)).into(imageView);
+
+            ProfileActivity.artistsListLinearLayout.addView(view);
+
+//            mGridAdapter.add(new TopArtist(
+//                    mProfileTopArtistsNames.get(i),
+//                    mProfileTopArtistsPlays.get(i),
+//                    mProfileTopArtistsPicURL.get(i)
+//            ));
         }
 
-        ProfileActivity.profileProgressBar.setVisibility(View.INVISIBLE);
+        //Util.setListViewHeightBasedOnChildren(mContext, ProfileActivity.listView);
+        //Util.setListViewHeightBasedOnChildren(mContext, ProfileActivity.gridView);
+        //ProfileActivity.profileProgressBar.setVisibility(View.INVISIBLE);
     }
 }
