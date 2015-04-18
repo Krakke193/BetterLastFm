@@ -1,12 +1,17 @@
 package com.example.andrey.betterlastfm.loaders;
 
 import android.content.AsyncTaskLoader;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.Util;
+import com.example.andrey.betterlastfm.data.ProfileContract;
+import com.example.andrey.betterlastfm.data.RecentTracksProvider;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -196,6 +201,23 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
             String jsonStr = buffer.toString();
 
             errFlag = isErrorGetFromJson(jsonStr);
+
+//            ContentValues cv = new ContentValues();
+//            cv.put(CONTACT_NAME, "name 5");
+//            cv.put(CONTACT_EMAIL, "email 5");
+//            Uri uri = ContentUris.withAppendedId(CONTACT_URI, 2);
+//            int cnt = getContentResolver().update(uri, cv, null, null);
+//            Log.d(LOG_TAG, "update, count = " + cnt);
+
+
+            ContentValues contentValues = new ContentValues();
+
+            contentValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
+            int cnt = mContext.getContentResolver().update(RecentTracksProvider.TRACKS_CONTENT_URI, contentValues, null, null);
+            Log.d(LOG_TAG, "Scrobble status removed from " + Integer.toString(cnt) + " rows");
+
+
+
 
             /**
              * TODO: All scrobbled tracks must lose their scrobble_flag = 1 attribute.

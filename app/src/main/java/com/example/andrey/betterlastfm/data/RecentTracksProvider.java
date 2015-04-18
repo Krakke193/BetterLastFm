@@ -151,6 +151,27 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        Log.d(LOG_TAG, "update, " + uri.toString());
+        switch (uriMatcher.match(uri)) {
+            case URI_TRACKS:
+                Log.d(LOG_TAG, "URI_CONTACTS");
+
+                break;
+            case URI_TRACKS_ID:
+                String id = uri.getLastPathSegment();
+                Log.d(LOG_TAG, "URI_CONTACTS_ID, " + id);
+                if (TextUtils.isEmpty(selection)) {
+                    selection = ProfileContract.RecentTracksEntry._ID + " = " + id;
+                } else {
+                    selection = selection + " AND " + ProfileContract.RecentTracksEntry._ID + " = " + id;
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Wrong URI: " + uri);
+        }
+        db = mProfileDbHelper.getWritableDatabase();
+        int cnt = db.update(ProfileContract.RecentTracksEntry.TABLE_NAME, values, selection, selectionArgs);
+        getContext().getContentResolver().notifyChange(uri, null);
+        return cnt;
     }
 }

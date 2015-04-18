@@ -1,11 +1,17 @@
 package com.example.andrey.betterlastfm.loaders;
 
 import android.content.AsyncTaskLoader;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
+import com.example.andrey.betterlastfm.Util;
+import com.example.andrey.betterlastfm.data.ProfileContract;
+import com.example.andrey.betterlastfm.data.RecentTracksProvider;
 import com.example.andrey.betterlastfm.model.RecentTrack;
 
 import org.json.JSONArray;
@@ -30,7 +36,8 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
     private ArrayAdapter<RecentTrack> mListAdapter;
     private String mUserName;
 
-    private ArrayList<String> mProfileRecentTracksArray = new ArrayList<>();
+    private ArrayList<String> mProfileRecentTracksTitles = new ArrayList<>();
+    private ArrayList<String> mProfileRecentTracksArtists = new ArrayList<>();
     private ArrayList<String> mProfileRecentTracksArrayURL = new ArrayList<>();
 
     public RecentTracksLoader(Context context,
@@ -126,12 +133,8 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
             JSONArray recentTracksArr = recentTracksJson.getJSONArray("track");
 
             for (int i=0; i<recentTracksArr.length(); i++){
-                mProfileRecentTracksArray.add(recentTracksArr
-                        .getJSONObject(i)
-                        .getJSONObject("artist")
-                        .getString(ARTIST) +
-                        " - " +
-                        recentTracksArr.getJSONObject(i).getString(NAME));
+                mProfileRecentTracksArtists.add(recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST));
+                mProfileRecentTracksTitles.add(recentTracksArr.getJSONObject(i).getString(NAME));
 
                 JSONArray imageJson = recentTracksArr.getJSONObject(i).getJSONArray("image");
 
@@ -143,6 +146,37 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
                 }
 
                 mProfileRecentTracksArrayURL.add(imageURL);
+            }
+
+            SharedPreferences shrdPrfs =
+                    mContext.getSharedPreferences("com.example.andrey.betterlastfm",Context.MODE_PRIVATE);
+            String username = shrdPrfs.getString("username", Util.ERROR);
+            if (username.equals(Util.ERROR))
+                Toast.makeText(mContext, "Ooops! something went wrong!", Toast.LENGTH_SHORT).show();
+
+            if (mUserName.equals(username)){
+                ContentValues recentTrackValues = new ContentValues();
+
+                mContext.getContentResolver()
+                        .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
+                //Log.d(LOG_TAG, "deleted " + deleted + "rows!");
+
+
+                for (int i = 9; i >= 0; i--){
+                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
+                            mProfileRecentTracksArrayURL.get(i));
+                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST,
+                            mProfileRecentTracksArtists.get(i));
+                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
+                            mProfileRecentTracksTitles.get(i));
+                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP, "");
+                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
+
+                    mContext.getContentResolver()
+                            .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
+
+                    //Log.d(LOG_TAG, "insert, result Uri : " + newUri.toString());
+                }
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -158,7 +192,7 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
 
         for(int i=0; i<10; i++) {
             mListAdapter.add(new RecentTrack(
-                    mProfileRecentTracksArray.get(i),
+                    mProfileRecentTracksArtists.get(i) + " - " + mProfileRecentTracksTitles.get(i),
                     mProfileRecentTracksArrayURL.get(i)
             ));
         }

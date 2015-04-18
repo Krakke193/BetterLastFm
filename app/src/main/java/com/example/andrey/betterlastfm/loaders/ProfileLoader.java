@@ -3,7 +3,9 @@ package com.example.andrey.betterlastfm.loaders;
 import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -12,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.example.andrey.betterlastfm.ProfileActivity;
@@ -42,12 +46,11 @@ import java.util.ArrayList;
 public class ProfileLoader extends AsyncTaskLoader<Void> {
     private static final String LOG_TAG = ProfileLoader.class.getSimpleName();
 
-    private ArrayAdapter<RecentTrack> mListAdapter;
-    private ArrayAdapter<TopArtist> mGridAdapter;
     private String mUserName;
     private Context mContext;
     private ProfileDbHelper dbHelper;
     private SQLiteDatabase mDbWrite;
+    private SharedPreferences mShrdPrefs;
 
     private String[] profileHeaderArray = new String[7];
 
@@ -59,21 +62,17 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
     private ArrayList<String> mProfileTopArtistsPlays = new ArrayList<>();
     private ArrayList<String> mProfileTopArtistsPicURL = new ArrayList<>();
 
-//    private String[] profileTopArtistsArray = new String[8];
-//    private String[] profileTopArtistsArrayPlaycount = new String[8];
-//    private String[] profileTopArtistsUrlArray = new String[8];
-
-    public ProfileLoader(Context context, ArrayAdapter<RecentTrack> listAdapter,
-                         ArrayAdapter<TopArtist> gridAdapter, String userName){
+    public ProfileLoader(Context context, String userName){
         super(context);
         this.mContext = context;
-        this.mListAdapter = listAdapter;
-        this.mGridAdapter = gridAdapter;
         this.mUserName = userName;
 
         dbHelper = new ProfileDbHelper(mContext);
         mDbWrite = dbHelper.getWritableDatabase();
+        mShrdPrefs = mContext.getSharedPreferences("com.example.andrey.betterlastfm",Context.MODE_PRIVATE);
     }
+
+
 
     /** Parsing JSON data for profile info and inserting database values! */
     private String[] getProfileInfoFromJson(String profileJsonStr) throws JSONException{
@@ -111,7 +110,6 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
 
         //Database insertion!
 
-        //int counter = 0;
         if (mUserName.equals("se0ko")){
 
             mDbWrite.delete(
@@ -129,9 +127,7 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
             headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_PLAYCOUNT, profileHeaderArray[5]);
             headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_REGISTRY_DATE, profileHeaderArray[6]);
             mDbWrite.insert(ProfileContract.HeaderEntry.TABLE_NAME, null, headerValues);
-            //counter++;
         }
-        //Log.d(LOG_TAG, "Inserted " + Integer.toString(counter) + " header notes");
         return profileHeaderArray;
     }
 
@@ -172,8 +168,6 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
 
             mContext.getContentResolver()
                     .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
-            //Log.d(LOG_TAG, "deleted " + deleted + "rows!");
-
 
             for (int i = 9; i >= 0; i--){
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
@@ -187,8 +181,6 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
 
                 mContext.getContentResolver()
                         .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
-
-                //Log.d(LOG_TAG, "insert, result Uri : " + newUri.toString());
             }
         }
         return profileRecentTracksUrlArray;
@@ -474,6 +466,7 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
         );
 
         ProfileActivity.tracksListLinearLayout.removeAllViews();
+
         for(int i=0; i<5; i++) {
             View header = LayoutInflater.from(mContext).inflate(R.layout.item_recent_tracks_list, null);
             ((TextView) header.findViewById(R.id.list_textview))
@@ -486,22 +479,22 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
                 Picasso.with(mContext).load(profileRecentTracksUrlArray[i]).into(imageView);
 
             ProfileActivity.tracksListLinearLayout.addView(header);
+
+            ImageView divider1 = new ImageView(mContext);
+            LinearLayout.LayoutParams lp1 =
+                    new LinearLayout.LayoutParams(RadioGroup.LayoutParams.MATCH_PARENT, 1);
+            lp1.setMargins(5, 0, 5, 0);
+            divider1.setLayoutParams(lp1);
+            divider1.setBackgroundColor(Color.rgb(200, 200, 200));
+            ProfileActivity.tracksListLinearLayout.addView(divider1);
         }
 
-
-//        mListAdapter.clear();
-//        for(int i=0; i<5; i++) {
-//            mListAdapter.add(new RecentTrack(
-//                    profileRecentTracksArtist[i] + " - " + profileRecentTracksTitle[i],
-//                    profileRecentTracksUrlArray[i]
-//            ));
-//        }
-
-        mGridAdapter.clear();
         ProfileActivity.artistsListLinearLayout.removeAllViews();
-        int fullPlays = Integer.parseInt(mProfileTopArtistsPlays.get(0).replaceAll("plays",""));
-        for (int i=0; i<mProfileTopArtistsNames.size(); i++){
 
+        int fullPlays = Integer.parseInt(mProfileTopArtistsPlays.get(0).replaceAll("plays",""));
+        int currentFullWidth = mShrdPrefs.getInt("full_width", 50);
+
+        for (int i=0; i<mProfileTopArtistsNames.size(); i++){
             View view = LayoutInflater.from(mContext).inflate(R.layout.item_artists_list, null);
 
             ImageView imageView = (ImageView) view.findViewById(R.id.artists_list_imageview);
@@ -517,23 +510,13 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
 
             ViewGroup.LayoutParams params = relativeBar.getLayoutParams();
             //params.width = (int) ((percentage * fullWidth)) / 100;
-            params.width = (int) ((ProfileActivity.fullWidth * percentage) / 100);
+            params.width = (int) ((currentFullWidth * percentage) / 100);
             relativeBar.setLayoutParams(params);
 
             if (!TextUtils.isEmpty(mProfileTopArtistsPicURL.get(i)))
                 Picasso.with(mContext).load(mProfileTopArtistsPicURL.get(i)).into(imageView);
 
             ProfileActivity.artistsListLinearLayout.addView(view);
-
-//            mGridAdapter.add(new TopArtist(
-//                    mProfileTopArtistsNames.get(i),
-//                    mProfileTopArtistsPlays.get(i),
-//                    mProfileTopArtistsPicURL.get(i)
-//            ));
         }
-
-        //Util.setListViewHeightBasedOnChildren(mContext, ProfileActivity.listView);
-        //Util.setListViewHeightBasedOnChildren(mContext, ProfileActivity.gridView);
-        //ProfileActivity.profileProgressBar.setVisibility(View.INVISIBLE);
     }
 }

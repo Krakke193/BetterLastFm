@@ -4,4 +4,13 @@
     tools:context="com.example.andrey.betterlastfm.RecentTracksActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_refresh_recent_tracks"
+        android:title="Refresh"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_scrobble_recent_tracks"
+        android:title="Scrobble"
+        app:showAsAction="never" />
 </menu>

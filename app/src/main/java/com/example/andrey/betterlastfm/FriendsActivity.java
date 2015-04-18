@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.example.andrey.betterlastfm.adapters.FriendsAdapter;
 import com.example.andrey.betterlastfm.loaders.FriendsLoader;
@@ -19,6 +20,7 @@ import com.example.andrey.betterlastfm.loaders.FriendsLoader;
 public class FriendsActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Void>{
 
     private final String LOG_TAG = this.getClass().getSimpleName();
+    private ProgressBar bar;
     private String mUserName;
     private FriendsAdapter mFrienListAdapter;
 
@@ -27,13 +29,16 @@ public class FriendsActivity extends ActionBarActivity implements LoaderManager.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
 
+        bar = (ProgressBar) this.findViewById(R.id.progressBar);
         ListView friendList = (ListView) findViewById(R.id.friend_list);
+
         mFrienListAdapter = new FriendsAdapter(this, R.layout.item_friends_list);
 
         mUserName = getIntent().getStringExtra("user");
 
         friendList.setAdapter(mFrienListAdapter);
 
+        bar.setVisibility(View.VISIBLE);
         getLoaderManager().initLoader(0, null, this);
         getLoaderManager().getLoader(0).forceLoad();
 
@@ -84,7 +89,7 @@ public class FriendsActivity extends ActionBarActivity implements LoaderManager.
 
     @Override
     public void onLoadFinished(Loader<Void> loader, Void data) {
-
+        bar.setVisibility(View.GONE);
     }
 
     @Override

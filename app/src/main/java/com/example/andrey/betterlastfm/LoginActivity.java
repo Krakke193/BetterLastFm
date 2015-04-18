@@ -38,7 +38,7 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
         SharedPreferences sharedPreferences = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
         if (sharedPreferences.contains("username") && sharedPreferences.contains("session_key")){
             Log.d(LOG_TAG, "true!");
-            startActivity(new Intent(this, ProfileActivity.class));
+            startActivity(new Intent(this, ProfileActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
         }
 
         Log.d(LOG_TAG,sharedPreferences.getString("username", "ERROR NO USERNAME"));
@@ -64,19 +64,14 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
                 SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("api_signature", apiSignature);
+                editor.putString("username", username);
                 editor.commit();
 
                 Log.d(LOG_TAG, apiSignature);
 
-//                SessionKeyLoader sessionKeyLoader = new SessionKeyLoader(getApplicationContext(),
-//                        username, password, apiKey, apiSignature);
-                //String sessionKey = sessionKeyLoader.startLoading();
-
                 initLoader();
 
                 getLoaderManager().getLoader(0).forceLoad();
-
-//                Log.d(LOG_TAG, "Session key: " + sessionKey);
             }
         });
     }

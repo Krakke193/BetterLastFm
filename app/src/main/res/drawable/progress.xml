@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rotate>
+    <shape
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:innerRadiusRatio="3"
+        android:shape="ring"
+        android:thicknessRatio="8"
+        android:useLevel="false">
+
+        <size
+            android:height="48dip"
+            android:width="48dip" />
+
+        <gradient
+            android:centerColor="@color/lastfm_red"
+            android:centerY="0.50"
+            android:endColor="@color/lastfm_red_dark"
+            android:startColor="@color/background_floating_material_dark"
+            android:type="sweep"
+            android:useLevel="false" />
+    </shape>
+</rotate>
