@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -20,11 +19,10 @@ import android.widget.TextView;
 
 import com.example.andrey.betterlastfm.ProfileActivity;
 import com.example.andrey.betterlastfm.R;
-import com.example.andrey.betterlastfm.Util;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
-import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.example.andrey.betterlastfm.model.TopArtist;
 import com.squareup.picasso.Picasso;
 
@@ -52,15 +50,10 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
     private SQLiteDatabase mDbWrite;
     private SharedPreferences mShrdPrefs;
 
+    private ArrayList<RecentTrack> mProfileRecentTracks = new ArrayList<>();
+    private ArrayList<TopArtist> mProfileTopArtists = new ArrayList<>();
+
     private String[] profileHeaderArray = new String[7];
-
-    private String[] profileRecentTracksTitle = new String[10];
-    private String[] profileRecentTracksArtist = new String[10];
-    private String[] profileRecentTracksUrlArray = new String[10];
-
-    private ArrayList<String> mProfileTopArtistsNames = new ArrayList<>();
-    private ArrayList<String> mProfileTopArtistsPlays = new ArrayList<>();
-    private ArrayList<String> mProfileTopArtistsPicURL = new ArrayList<>();
 
     public ProfileLoader(Context context, String userName){
         super(context);
@@ -71,8 +64,6 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
         mDbWrite = dbHelper.getWritableDatabase();
         mShrdPrefs = mContext.getSharedPreferences("com.example.andrey.betterlastfm",Context.MODE_PRIVATE);
     }
-
-
 
     /** Parsing JSON data for profile info and inserting database values! */
     private String[] getProfileInfoFromJson(String profileJsonStr) throws JSONException{
@@ -132,19 +123,18 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
     }
 
     /** Parsing JSON data for recent tracks info and inserting database values! */
-    private String[] getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
+    private void getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
         final String ARTIST = "#text";
         final String NAME = "name";
+
+        mProfileRecentTracks.clear();
 
         try {
             JSONObject tracksJson = new JSONObject(tracksJsonStr);
             JSONObject recentTracksJson = tracksJson.getJSONObject("recenttracks");
             JSONArray recentTracksArr = recentTracksJson.getJSONArray("track");
 
-            for (int i=0; i<profileRecentTracksTitle.length; i++){
-                profileRecentTracksArtist[i] = recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST);
-                profileRecentTracksTitle[i] = recentTracksArr.getJSONObject(i).getString(NAME);
-
+            for (int i=0; i<recentTracksArr.length(); i++){
                 JSONArray imageJson = recentTracksArr.getJSONObject(i).getJSONArray("image");
 
                 String imageURL = null;
@@ -154,7 +144,21 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
                     }
                 }
 
-                profileRecentTracksUrlArray[i] = imageURL;
+                String recentTrackDate;
+                try {
+                    recentTrackDate = recentTracksArr.getJSONObject(i).getJSONObject("date").getString("#text");
+                } catch (JSONException e){
+                    e.printStackTrace();
+                    recentTrackDate = "Now playing";
+                }
+
+                mProfileRecentTracks.add(new RecentTrack(
+                        recentTracksArr.getJSONObject(i).getString(NAME),
+                        recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST),
+                        "",
+                        imageURL,
+                        recentTrackDate
+                ));
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -169,21 +173,26 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
             mContext.getContentResolver()
                     .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
 
-            for (int i = 9; i >= 0; i--){
-                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
-                        profileRecentTracksUrlArray[i]);
+            Log.d(LOG_TAG, Integer.toString(mProfileRecentTracks.size()));
+
+            for (int i = mProfileRecentTracks.size()-1; i >= 0; i--){
+
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST,
-                        profileRecentTracksArtist[i]);
+                        mProfileRecentTracks.get(i).getTrackArtist());
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
-                        profileRecentTracksTitle[i]);
-                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP, "");
+                        mProfileRecentTracks.get(i).getTrackName());
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ALBUM,
+                        mProfileRecentTracks.get(i).getAlbum());
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
+                        mProfileRecentTracks.get(i).getTrackImageURL());
+                recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP,
+                        mProfileRecentTracks.get(i).getTrackDate());
                 recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
 
                 mContext.getContentResolver()
                         .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
             }
         }
-        return profileRecentTracksUrlArray;
     }
 
     /** Parsing JSON data for top artists and inserting database values! */
@@ -191,15 +200,13 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
         final String ARTIST_NAME = "name";
         final String PLAYCOUNT = "playcount";
 
+        mProfileTopArtists.clear();
         try {
             JSONObject tracksJson = new JSONObject(topArtistsJsonStr);
             JSONObject topArtistsJson = tracksJson.getJSONObject("topartists");
             JSONArray topArtistsArr = topArtistsJson.getJSONArray("artist");
 
             for (int i=0; i<topArtistsArr.length(); i++){
-                mProfileTopArtistsNames.add(topArtistsArr.getJSONObject(i).getString(ARTIST_NAME));
-                mProfileTopArtistsPlays.add(topArtistsArr.getJSONObject(i).getString(PLAYCOUNT) + "plays");
-
                 JSONArray imageJson = topArtistsArr.getJSONObject(i).getJSONArray("image");
 
                 String imageURL = null;
@@ -209,7 +216,11 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
                     }
                 }
 
-                mProfileTopArtistsPicURL.add(imageURL);
+                mProfileTopArtists.add(new TopArtist(
+                        topArtistsArr.getJSONObject(i).getString(ARTIST_NAME),
+                        topArtistsArr.getJSONObject(i).getString(PLAYCOUNT) + "plays",
+                        imageURL
+                ));
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -228,10 +239,10 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
 
             ContentValues topArtistsValues = new ContentValues();
 
-            for (int i = 0; i < mProfileTopArtistsNames.size(); i++){
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_ICON_URL, mProfileTopArtistsPicURL.get(i));
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_NAME, mProfileTopArtistsNames.get(i));
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT, mProfileTopArtistsPlays.get(i));
+            for (int i = 0; i < mProfileTopArtists.size(); i++){
+                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_ICON_URL, mProfileTopArtists.get(i).getArtistPicURL());
+                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_NAME, mProfileTopArtists.get(i).getArtistName());
+                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT, mProfileTopArtists.get(i).getArtistPlays());
 
                 mDbWrite.insert(
                         ProfileContract.TopArtistsEntry.TABLE_NAME,
@@ -442,12 +453,16 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
             }
         }
 
+
+        Log.d(LOG_TAG, "Finished loading in background");
         return null;
     }
 
     @Override
     public void deliverResult(Void data) {
         super.deliverResult(data);
+
+
 
         Picasso.with(mContext).load(profileHeaderArray[0]).into(ProfileActivity.ivProfilePic);
         ProfileActivity.tvProfileName.setText(profileHeaderArray[1]);
@@ -468,17 +483,22 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
         ProfileActivity.tracksListLinearLayout.removeAllViews();
 
         for(int i=0; i<5; i++) {
-            View header = LayoutInflater.from(mContext).inflate(R.layout.item_recent_tracks_list, null);
-            ((TextView) header.findViewById(R.id.list_textview))
-                    .setText(profileRecentTracksArtist[i] + " - " + profileRecentTracksTitle[i]);
+            View recentTrackView = LayoutInflater.from(mContext).inflate(R.layout.item_recent_tracks_list, null);
+            ((TextView) recentTrackView.findViewById(R.id.list_textview))
+                    .setText(mProfileRecentTracks.get(i).getTrackArtist() +
+                            " - " +
+                            mProfileRecentTracks.get(i).getTrackName());
+
+            ((TextView) recentTrackView.findViewById(R.id.recent_tracks_list_date))
+                    .setText(mProfileRecentTracks.get(i).getTrackDate());
 
 
-            ImageView imageView = (ImageView) header.findViewById(R.id.list_imageview);
+            ImageView imageView = (ImageView) recentTrackView.findViewById(R.id.list_imageview);
 
-            if (!TextUtils.isEmpty(profileRecentTracksUrlArray[i]))
-                Picasso.with(mContext).load(profileRecentTracksUrlArray[i]).into(imageView);
+            if (!TextUtils.isEmpty(mProfileRecentTracks.get(i).getTrackImageURL()))
+                Picasso.with(mContext).load(mProfileRecentTracks.get(i).getTrackImageURL()).into(imageView);
 
-            ProfileActivity.tracksListLinearLayout.addView(header);
+            ProfileActivity.tracksListLinearLayout.addView(recentTrackView);
 
             ImageView divider1 = new ImageView(mContext);
             LinearLayout.LayoutParams lp1 =
@@ -491,20 +511,20 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
 
         ProfileActivity.artistsListLinearLayout.removeAllViews();
 
-        int fullPlays = Integer.parseInt(mProfileTopArtistsPlays.get(0).replaceAll("plays",""));
+        int fullPlays = Integer.parseInt(mProfileTopArtists.get(0).getArtistPlays().replaceAll("plays", ""));
         int currentFullWidth = mShrdPrefs.getInt("full_width", 50);
 
-        for (int i=0; i<mProfileTopArtistsNames.size(); i++){
+        for (int i=0; i<mProfileTopArtists.size(); i++){
             View view = LayoutInflater.from(mContext).inflate(R.layout.item_artists_list, null);
 
             ImageView imageView = (ImageView) view.findViewById(R.id.artists_list_imageview);
             ((TextView) view.findViewById(R.id.artists_list_name_textview))
-                    .setText(mProfileTopArtistsNames.get(i));
+                    .setText(mProfileTopArtists.get(i).getArtistName());
             ((TextView) view.findViewById(R.id.artists_list_plays_textview))
-                    .setText(mProfileTopArtistsPlays.get(i));
+                    .setText(mProfileTopArtists.get(i).getArtistPlays());
 
-            float percentage = (Integer.parseInt(mProfileTopArtistsPlays.get(i).replaceAll("plays","")) * 100 / fullPlays);
-            Log.d(LOG_TAG, Float.toString(percentage));
+            float percentage = (Integer.parseInt(mProfileTopArtists.get(i).getArtistPlays().replaceAll("plays","")) * 100 / fullPlays);
+            //Log.d(LOG_TAG, Float.toString(percentage));
 
             ImageView relativeBar = (ImageView) view.findViewById(R.id.artists_relativebar_imageview);
 
@@ -513,10 +533,15 @@ public class ProfileLoader extends AsyncTaskLoader<Void> {
             params.width = (int) ((currentFullWidth * percentage) / 100);
             relativeBar.setLayoutParams(params);
 
-            if (!TextUtils.isEmpty(mProfileTopArtistsPicURL.get(i)))
-                Picasso.with(mContext).load(mProfileTopArtistsPicURL.get(i)).into(imageView);
+            if (!TextUtils.isEmpty(mProfileTopArtists.get(i).getArtistPicURL()))
+                Picasso.with(mContext).load(mProfileTopArtists.get(i).getArtistPicURL()).into(imageView);
 
             ProfileActivity.artistsListLinearLayout.addView(view);
+
+
         }
+
+
+        Log.d(LOG_TAG, "Result delivered?");
     }
 }

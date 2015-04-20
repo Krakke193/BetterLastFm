@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by andrey on 13.03.15.
  */
 public class ProfileDbHelper extends SQLiteOpenHelper{
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 9;
     static final String DATABASE_NAME = "profile.db";
 
     public ProfileDbHelper(Context context){
@@ -52,6 +52,7 @@ public class ProfileDbHelper extends SQLiteOpenHelper{
                 ProfileContract.RecentTracksEntry._ID + " INTEGER PRIMARY KEY," +
                 ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST + " TEXT NOT NULL, " +
                 ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME + " TEXT NOT NULL, " +
+                ProfileContract.RecentTracksEntry.COLUMN_TRACK_ALBUM + " TEXT NOT NULL, " +
                 ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP + " TEXT NOT NULL, " +
                 ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL + " TEXT NOT NULL, " +
                 ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG + " INTEGER NOT NULL" + " );";

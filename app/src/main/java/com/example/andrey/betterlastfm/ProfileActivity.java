@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -36,17 +35,14 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.andrey.betterlastfm.adapters.ArtistsAdapter;
 import com.example.andrey.betterlastfm.adapters.NavigationListAdapter;
-import com.example.andrey.betterlastfm.adapters.TracksAdapter;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.ProfileDbHelper;
 import com.example.andrey.betterlastfm.loaders.ScrobbleLoader;
-import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
 
-import com.example.andrey.betterlastfm.model.TopArtist;
 import com.example.andrey.betterlastfm.loaders.ProfileLoader;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -63,11 +59,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
     private ActionBarDrawerToggle mDrawerToggle;
 
-    public ArrayAdapter<RecentTrack> mListAdapter;
-    public ArrayAdapter<TopArtist> mGridAdapter;
-
     private ProgressBar bar;
-    private ProgressDialog mProgressDialog;
     private Button mButton;
     private CardView mCardList;
     private ProfileDbHelper profileDbHelper;
@@ -85,8 +77,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     public static Context profileContext;
 
     private ImageView tempRelativeBar;
-
-    public static final String USERNAME_KEY = "username_key";
 
     public void fillHeader(){
         Cursor cursor = db.query(
@@ -132,27 +122,29 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
             int recentTrackArtistIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
             int recentTrackNameIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackDateIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
             int recentTrackURLIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
 
 
             if (cursor.moveToFirst()){
-                mListAdapter.clear();
                 tracksListLinearLayout.removeAllViews();
                 for (int i=0; i<5; i++) {
 
-                    View header = LayoutInflater.from(this).inflate(R.layout.item_recent_tracks_list, null);
-                    ((TextView) header.findViewById(R.id.list_textview))
+                    View listItemView = LayoutInflater.from(this).inflate(R.layout.item_recent_tracks_list, null);
+                    ((TextView) listItemView.findViewById(R.id.list_textview))
                             .setText(cursor.getString(recentTrackArtistIndex) +
                                             " - " +
                                             cursor.getString(recentTrackNameIndex)
                             );
+                    ((TextView) listItemView.findViewById(R.id.recent_tracks_list_date))
+                            .setText(cursor.getString(recentTrackDateIndex));
 
-                    ImageView imageView = (ImageView) header.findViewById(R.id.list_imageview);
+                    ImageView imageView = (ImageView) listItemView.findViewById(R.id.list_imageview);
 
                     if (!TextUtils.isEmpty(cursor.getString(recentTrackURLIndex)))
                         Picasso.with(this).load(cursor.getString(recentTrackURLIndex)).into(imageView);
 
-                    tracksListLinearLayout.addView(header);
+                    tracksListLinearLayout.addView(listItemView);
                     Log.d(LOG_TAG, "Added new childview");
 
                     ImageView divider1 = new ImageView(this);
@@ -192,7 +184,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 .TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT);
 
         if (cursor.moveToFirst()){
-            mGridAdapter.clear();
             artistsListLinearLayout.removeAllViews();
 
             int currentFullWidth = mShrdPrefs.getInt("full_width", 50);
@@ -242,30 +233,27 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
         mShrdPrefs = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
         mUserName = mShrdPrefs.getString("username", "ERROR");
+        profileContext = this.getApplicationContext();
+        profileDbHelper = new ProfileDbHelper(this);
+        db = profileDbHelper.getReadableDatabase();
+        if (getIntent().hasExtra("user")){
+            mUserName = getIntent().getStringExtra("user");
+        }
+
+        getLoaderManager().initLoader(0, null, this);
 
         ivProfilePic = (ImageView) findViewById(R.id.iv_profile_pic);
         tvProfileName = (TextView) findViewById(R.id.tv_profile_name);
         tvProfileDetails = (TextView) findViewById(R.id.tv_profile_details);
         tvProfileListens = (TextView) findViewById(R.id.tv_profile_listens);
-
-        profileContext = this.getApplicationContext();
-        profileDbHelper = new ProfileDbHelper(this);
-        db = profileDbHelper.getReadableDatabase();
-
         tracksListLinearLayout = (LinearLayout) findViewById(R.id.recent_tracks_linear_layout);
         artistsListLinearLayout = (LinearLayout) findViewById(R.id.artists_linear_layout);
-
         mButton = (Button) findViewById(R.id.button_expand_list);
         mCardList = (CardView) findViewById(R.id.list_card);
-
         bar = (ProgressBar) this.findViewById(R.id.progressBar);
-//        mProgressDialog = new ProgressDialog(this);
-//        mProgressDialog.setIndeterminate(false);
-//        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         final LinearLayout tempLinearLayout = (LinearLayout) findViewById(R.id.temp_linear_layout);
         tempRelativeBar = (ImageView) findViewById(R.id.artists_relativebar_imageview);
-
         ViewTreeObserver vto = tempRelativeBar.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
@@ -278,20 +266,10 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
                     Log.d(LOG_TAG, "From this new method: " + Integer.toString(fullWidth));
                 }
-
                 tempLinearLayout.setVisibility(View.GONE);
                 return true;
             }
         });
-
-        if (getIntent().hasExtra("user")){
-            mUserName = getIntent().getStringExtra("user");
-        }
-
-        mListAdapter = new TracksAdapter(this,R.layout.item_recent_tracks_list);
-        mGridAdapter = new ArtistsAdapter(this,R.layout.item_top_artists_grid);
-
-        getLoaderManager().initLoader(0, null, this);
 
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -333,12 +311,12 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 switch (position){
                     case 0: {
                         startActivity(new Intent(getApplicationContext(),ProfileActivity.class).
-                                putExtra("user","se0ko"));
+                                putExtra("user", mShrdPrefs.getString("username", "ERROR")));
                         break;
                     }
                     case 1: {
                         startActivity(new Intent(getApplicationContext(),FriendsActivity.class).
-                                putExtra("user", mUserName));
+                                putExtra("user", mShrdPrefs.getString("username", "ERROR")));
                         break;
                     }
                 }
@@ -372,16 +350,14 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     protected void onResume() {
         super.onResume();
 
+
+
         Log.d(LOG_TAG, "ON RESUMED!");
         if (mUserName.equals(mShrdPrefs.getString("username", "ERROR"))){
             fillHeader();
             fillRecentTracks();
             fillTopArtists();
         }
-
-        //tracksListLinearLayout.setDividerDrawable(getResources().getDrawable(R.drawable.divider));
-        tracksListLinearLayout.setDividerPadding(10);
-        tracksListLinearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
     }
 
     @Override
@@ -408,15 +384,14 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             try {
                 bar.setVisibility(View.VISIBLE);
                 getLoaderManager().getLoader(0).forceLoad();
+                //getLoaderManager().getLoader(0).forceLoad();
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
             }
 
         } else if (id == R.id.action_scrobble){
-            ArrayList<String> trackNames = new ArrayList<>();
-            ArrayList<String> trackArtists = new ArrayList<>();
-            ArrayList<String> trackTimestamps = new ArrayList<>();
+            ArrayList<RecentTrack> profileRecentTracks = new ArrayList<>();
 
             Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
                     null,
@@ -429,27 +404,34 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
             int recentTrackNameIndex = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackAlbumIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ALBUM);
             int recentTrackTimestamp = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
 
             if (cursor.moveToFirst()){
                 int i = 0;
                 do{
-                    trackNames.add(cursor.getString(recentTrackNameIndex));
-                    trackArtists.add(cursor.getString(recentTrackArtistIndex));
-                    trackTimestamps.add(cursor.getString(recentTrackTimestamp));
+                    profileRecentTracks.add(new RecentTrack(
+                            cursor.getString(recentTrackNameIndex),
+                            cursor.getString(recentTrackArtistIndex),
+                            cursor.getString(recentTrackAlbumIndex),
+                            "",
+                            cursor.getString(recentTrackTimestamp)
+                    ));
                 } while (cursor.moveToNext());
 
                 ScrobbleLoader scrobbleLoader = new ScrobbleLoader(this,
                         Util.API_KEY,
-                        trackNames,
-                        trackArtists,
-                        trackTimestamps);
+                        profileRecentTracks);
+
                 scrobbleLoader.forceLoad();
+
             } else {
                 Toast.makeText(this, "Nothing to scrobble!", Toast.LENGTH_SHORT).show();
             }
 
+            cursor.close();
         } else if (id == R.id.action_friends){
             startActivity(new Intent(this,FriendsActivity.class).putExtra("user", mUserName));
         }
@@ -459,7 +441,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     @Override
     public Loader<Void> onCreateLoader(int id, Bundle args) {
 
-        //mProgressDialog.show();
         return new ProfileLoader(this, mUserName);
     }
 
@@ -468,6 +449,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         bar.setVisibility(View.GONE);
         //mProgressDialog.dismiss();
         Log.d(LOG_TAG, "Loader finished?");
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override

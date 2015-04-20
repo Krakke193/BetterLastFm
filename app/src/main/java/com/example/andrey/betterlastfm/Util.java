@@ -22,6 +22,7 @@ public class Util {
     public static final String SECRET = "5b332291ad05138bd2e441a22262e5b2";
     public static final String API_KEY = "f445e682840e750fc7c992898e868efb";
     public static final String ERROR = "Error";
+    public static final String PREF_SCROBBLE_KEY = "pref_scrobble_key";
 
     public static String md5(String s) {
         final String MD5 = "MD5";

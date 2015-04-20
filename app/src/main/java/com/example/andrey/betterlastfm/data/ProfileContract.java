@@ -34,6 +34,7 @@ public class ProfileContract {
         public static final String COLUMN_USER_ID = "user_id";
         public static final String COLUMN_TRACK_ARTIST = "track_artist";
         public static final String COLUMN_TRACK_NAME = "track_title";
+        public static final String COLUMN_TRACK_ALBUM = "track_album";
         public static final String COLUMN_TRACK_TIMESTAMP = "track_timestamp";
         public static final String COLUMN_TRACK_ICON_URL = "track_icon_url";
         public static final String COLUMN_SCROBBLEABLE_FLAG = "scrobbleable_flag";

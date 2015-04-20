@@ -14,48 +14,66 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true">
 
-        <LinearLayout
-            android:gravity="right"
-            android:orientation="horizontal"
+        <EditText
+            android:hint="User name"
+            android:layout_weight="1"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:id="@+id/username_login_edit_text"
+            android:inputType="textWebEmailAddress" />
 
-            <TextView
-                android:gravity="center"
-                android:layout_weight="1"
-                android:text="@string/account_login"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent" />
-
-            <EditText
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:id="@+id/username_login_edit_text"
-                android:inputType="textWebEmailAddress" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
+        <EditText
+            android:hint="Password"
+            android:layout_weight="1"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:id="@+id/userpassword_login_edit_text"
+            android:inputType="textPassword" />
 
-            <TextView
-                android:gravity="center"
-                android:layout_weight="1"
-                android:text="@string/account_password"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent" />
+        <!--<LinearLayout-->
+            <!--android:gravity="right"-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content">-->
 
-            <EditText
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:id="@+id/userpassword_login_edit_text"
-                android:inputType="textPassword" />
+            <!--<TextView-->
+                <!--android:gravity="center"-->
+                <!--android:layout_weight="1"-->
+                <!--android:text="@string/account_login"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="fill_parent" />-->
 
-        </LinearLayout>
+            <!--<EditText-->
+                <!--android:hint="User name"-->
+                <!--android:layout_weight="1"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="fill_parent"-->
+                <!--android:id="@+id/username_login_edit_text"-->
+                <!--android:inputType="textWebEmailAddress" />-->
+
+        <!--</LinearLayout>-->
+
+        <!--<LinearLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="wrap_content">-->
+
+            <!--<TextView-->
+                <!--android:gravity="center"-->
+                <!--android:layout_weight="1"-->
+                <!--android:text="@string/account_password"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="fill_parent" />-->
+
+            <!--<EditText-->
+                <!--android:hint="Password"-->
+                <!--android:layout_weight="1"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="fill_parent"-->
+                <!--android:id="@+id/userpassword_login_edit_text"-->
+                <!--android:inputType="textPassword" />-->
+
+        <!--</LinearLayout>-->
 
         <Button
             android:layout_gravity="center"

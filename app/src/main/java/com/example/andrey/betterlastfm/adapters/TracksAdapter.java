@@ -2,14 +2,12 @@ package com.example.andrey.betterlastfm.adapters;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.R;
 import com.squareup.picasso.Picasso;
@@ -40,11 +38,12 @@ public class TracksAdapter extends ArrayAdapter<RecentTrack> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_recent_tracks_list, null);
         }
 
-        ((TextView) convertView.findViewById(R.id.list_textview)).setText(recentTrack.trackInfo);
+        ((TextView) convertView.findViewById(R.id.list_textview)).setText(recentTrack.getTrackArtist() + " - " + recentTrack.getTrackName());
+        ((TextView) convertView.findViewById(R.id.recent_tracks_list_date)).setText(recentTrack.getTrackDate());
         ImageView imageView = (ImageView) convertView.findViewById(R.id.list_imageview);
 
-        if (!TextUtils.isEmpty(recentTrack.trackImageURL))
-            Picasso.with(mContext).load(recentTrack.trackImageURL).into(imageView);
+        if (!TextUtils.isEmpty(recentTrack.getTrackImageURL()))
+            Picasso.with(mContext).load(recentTrack.getTrackImageURL()).into(imageView);
 
         return convertView;
     }

@@ -36,9 +36,7 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
     private ArrayAdapter<RecentTrack> mListAdapter;
     private String mUserName;
 
-    private ArrayList<String> mProfileRecentTracksTitles = new ArrayList<>();
-    private ArrayList<String> mProfileRecentTracksArtists = new ArrayList<>();
-    private ArrayList<String> mProfileRecentTracksArrayURL = new ArrayList<>();
+    private ArrayList<RecentTrack> mProfileRecentTracks = new ArrayList<>();
 
     public RecentTracksLoader(Context context,
                               ArrayAdapter<RecentTrack> listAdapter, String userName){
@@ -127,15 +125,14 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
         final String ARTIST = "#text";
         final String NAME = "name";
 
+        mProfileRecentTracks.clear();
+
         try {
             JSONObject tracksJson = new JSONObject(tracksJsonStr);
             JSONObject recentTracksJson = tracksJson.getJSONObject("recenttracks");
             JSONArray recentTracksArr = recentTracksJson.getJSONArray("track");
 
             for (int i=0; i<recentTracksArr.length(); i++){
-                mProfileRecentTracksArtists.add(recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST));
-                mProfileRecentTracksTitles.add(recentTracksArr.getJSONObject(i).getString(NAME));
-
                 JSONArray imageJson = recentTracksArr.getJSONObject(i).getJSONArray("image");
 
                 String imageURL = null;
@@ -145,7 +142,23 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
                     }
                 }
 
-                mProfileRecentTracksArrayURL.add(imageURL);
+                String recentTrackDate;
+                try {
+                    recentTrackDate = recentTracksArr.getJSONObject(i).getJSONObject("date").getString("#text");
+                } catch (JSONException e){
+                    e.printStackTrace();
+                    recentTrackDate = "Now playing";
+                }
+
+                mProfileRecentTracks.add(new RecentTrack(
+                        recentTracksArr.getJSONObject(i).getString(NAME),
+                        recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST),
+                        "",
+                        imageURL,
+                        recentTrackDate
+                ));
+
+//                mProfileRecentTracksArrayURL.add(imageURL);
             }
 
             SharedPreferences shrdPrfs =
@@ -164,12 +177,15 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
 
                 for (int i = 9; i >= 0; i--){
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
-                            mProfileRecentTracksArrayURL.get(i));
+                            mProfileRecentTracks.get(i).getTrackImageURL());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST,
-                            mProfileRecentTracksArtists.get(i));
+                            mProfileRecentTracks.get(i).getTrackArtist());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
-                            mProfileRecentTracksTitles.get(i));
-                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP, "");
+                            mProfileRecentTracks.get(i).getTrackName());
+                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ALBUM,
+                            mProfileRecentTracks.get(i).getAlbum());
+                    recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP,
+                            mProfileRecentTracks.get(i).getTrackDate());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
 
                     mContext.getContentResolver()
@@ -190,11 +206,9 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
 
         mListAdapter.clear();
 
+        Log.d(LOG_TAG, Integer.toString(mProfileRecentTracks.size()));
         for(int i=0; i<10; i++) {
-            mListAdapter.add(new RecentTrack(
-                    mProfileRecentTracksArtists.get(i) + " - " + mProfileRecentTracksTitles.get(i),
-                    mProfileRecentTracksArrayURL.get(i)
-            ));
+            mListAdapter.add(mProfileRecentTracks.get(i));
         }
     }
 }

@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.adapters.TracksAdapter;
@@ -32,6 +33,7 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
     private static final String LOG_TAG = RecentTracksActivity.class.getSimpleName();
 
     private String mUserName;
+    private ProgressBar bar;
 
     public ArrayAdapter<RecentTrack> mListAdapter;
 
@@ -50,6 +52,8 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
         mListView.setScrollContainer(false);
         mListAdapter = new TracksAdapter(this,R.layout.item_recent_tracks_list);
         mListView.setAdapter(mListAdapter);
+
+        bar = (ProgressBar) this.findViewById(R.id.progress_bar_recent);
 
         getLoaderManager().initLoader(0, null, this);
 
@@ -76,19 +80,24 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
                     null,
                     ProfileContract.RecentTracksEntry._ID + " " + "DESC");
 
-            int recentTrackIconURL = cursor
+            int recentTrackIconIndexURL = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
-            int recentTrackArtist = cursor
+            int recentTrackArtistIndex = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
-            int recentTrackName = cursor
+            int recentTrackNameIndex = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackDateIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
 
             cursor.moveToFirst();
 
             do {
                 mListAdapter.add(new RecentTrack(
-                        cursor.getString(recentTrackArtist) + " - " + cursor.getString(recentTrackName),
-                        cursor.getString(recentTrackIconURL)
+                        cursor.getString(recentTrackNameIndex),
+                        cursor.getString(recentTrackArtistIndex),
+                        "",
+                        cursor.getString(recentTrackIconIndexURL),
+                        cursor.getString(recentTrackDateIndex)
                 ));
 
             } while (cursor.moveToNext());
@@ -118,6 +127,7 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
             return true;
         } else if (id == R.id.action_refresh_recent_tracks) {
             try {
+                bar.setVisibility(View.VISIBLE);
                 getLoaderManager().getLoader(0).forceLoad();
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
@@ -125,9 +135,8 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
             }
 
         } else if (id == R.id.action_scrobble_recent_tracks) {
-            ArrayList<String> trackNames = new ArrayList<>();
-            ArrayList<String> trackArtists = new ArrayList<>();
-            ArrayList<String> trackTimestamps = new ArrayList<>();
+
+            ArrayList<RecentTrack> recentTracks = new ArrayList<>();
 
             Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
                     null,
@@ -140,22 +149,27 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
             int recentTrackNameIndex = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackAlbumIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ALBUM);
             int recentTrackTimestamp = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
 
             if (cursor.moveToFirst()) {
                 int i = 0;
                 do {
-                    trackNames.add(cursor.getString(recentTrackNameIndex));
-                    trackArtists.add(cursor.getString(recentTrackArtistIndex));
-                    trackTimestamps.add(cursor.getString(recentTrackTimestamp));
+
+                    recentTracks.add(new RecentTrack(
+                            cursor.getString(recentTrackNameIndex),
+                            cursor.getString(recentTrackArtistIndex),
+                            cursor.getString(recentTrackAlbumIndex),
+                            "",
+                            cursor.getString(recentTrackTimestamp)
+                    ));
                 } while (cursor.moveToNext());
 
                 ScrobbleLoader scrobbleLoader = new ScrobbleLoader(this,
                         Util.API_KEY,
-                        trackNames,
-                        trackArtists,
-                        trackTimestamps);
+                        recentTracks);
                 scrobbleLoader.forceLoad();
             } else {
                 Toast.makeText(this, "Nothing to scrobble!", Toast.LENGTH_SHORT).show();
@@ -168,6 +182,8 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
     @Override
     protected void onPause() {
         super.onPause();
+
+        getLoaderManager().getLoader(0).stopLoading();
     }
 
     @Override
@@ -185,7 +201,9 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
 
     @Override
     public void onLoadFinished(Loader<Void> loader, Void data) {
-
+        Log.d(LOG_TAG, "Finished loading.");
+        bar.setVisibility(View.GONE);
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override

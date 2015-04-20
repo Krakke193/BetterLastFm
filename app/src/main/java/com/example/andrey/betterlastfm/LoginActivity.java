@@ -28,14 +28,15 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
     private String password;
     private String apiKey;
     private String apiSignature;
-    private Context context;
+
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
         if (sharedPreferences.contains("username") && sharedPreferences.contains("session_key")){
             Log.d(LOG_TAG, "true!");
             startActivity(new Intent(this, ProfileActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
@@ -61,8 +62,8 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
                 apiSignature = Util.md5(tmp);
 
-                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
+                sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("api_signature", apiSignature);
                 editor.putString("username", username);
                 editor.commit();
@@ -87,7 +88,8 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
-
+        if (sharedPreferences.contains("username") && sharedPreferences.contains("api_signature"))
+            startActivity(new Intent(this, ProfileActivity.class));
     }
 
     @Override
