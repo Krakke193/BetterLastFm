@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,9 +16,12 @@ import android.widget.ProgressBar;
 
 import com.example.andrey.betterlastfm.adapters.FriendsAdapter;
 import com.example.andrey.betterlastfm.loaders.FriendsLoader;
+import com.example.andrey.betterlastfm.model.Friend;
+
+import java.util.ArrayList;
 
 
-public class FriendsActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Void>{
+public class FriendsActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<ArrayList<Friend>> {
 
     private final String LOG_TAG = this.getClass().getSimpleName();
     private ProgressBar bar;
@@ -28,6 +32,10 @@ public class FriendsActivity extends ActionBarActivity implements LoaderManager.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         bar = (ProgressBar) this.findViewById(R.id.progressBar);
         ListView friendList = (ListView) findViewById(R.id.friend_list);
@@ -46,9 +54,9 @@ public class FriendsActivity extends ActionBarActivity implements LoaderManager.
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-                intent.putExtra("user", mFrienListAdapter.getItem(position).friendName);
+                intent.putExtra("user", mFrienListAdapter.getItem(position).getFriendName());
                 startActivity(intent);
-                Log.d(LOG_TAG, mFrienListAdapter.getItem(position).friendName);
+                Log.d(LOG_TAG, mFrienListAdapter.getItem(position).getFriendName());
             }
         });
     }
@@ -83,17 +91,23 @@ public class FriendsActivity extends ActionBarActivity implements LoaderManager.
     }
 
     @Override
-    public Loader<Void> onCreateLoader(int id, Bundle args) {
-        return new FriendsLoader(this, mFrienListAdapter, mUserName);
+    public Loader<ArrayList<Friend>> onCreateLoader(int id, Bundle args) {
+        return new FriendsLoader(this, mUserName);
     }
 
     @Override
-    public void onLoadFinished(Loader<Void> loader, Void data) {
-        bar.setVisibility(View.GONE);
+    public void onLoadFinished(Loader<ArrayList<Friend>> loader, ArrayList<Friend> data) {
+        mFrienListAdapter.clear();
+        for (Friend friend : data) {
+            mFrienListAdapter.add(friend);
+
+            bar.setVisibility(View.GONE);
+        }
     }
 
     @Override
-    public void onLoaderReset(Loader<Void> loader) {
+    public void onLoaderReset(Loader<ArrayList<Friend>> loader) {
 
     }
+
 }

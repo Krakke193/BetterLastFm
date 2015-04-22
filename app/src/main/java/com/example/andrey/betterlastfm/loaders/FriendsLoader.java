@@ -23,25 +23,22 @@ import java.util.ArrayList;
 /**
  * Created by Andrey on 08.04.2015.
  */
-public class FriendsLoader extends AsyncTaskLoader<Void> {
+public class FriendsLoader extends AsyncTaskLoader<ArrayList<Friend>> {
     private final String LOG_TAG = FriendsLoader.class.getSimpleName();
 
     private Context mContext;
-    private ArrayAdapter<Friend> mArrayAdapter;
     private String mUserName;
+    private ArrayList<Friend> friends = new ArrayList<>();
 
-    private ArrayList<String> mFriendsArray = new ArrayList<>();
-    private ArrayList<String> mFriendsImageUrlArray = new ArrayList<>();
 
-    public FriendsLoader(Context context, ArrayAdapter<Friend> arrayAdapter, String userName){
+    public FriendsLoader(Context context, String userName){
         super(context);
         this.mContext = context;
-        this.mArrayAdapter = arrayAdapter;
         this.mUserName = userName;
     }
 
     @Override
-    public Void loadInBackground() {
+    public ArrayList<Friend> loadInBackground() {
         if (mUserName.equals(""))
             return null;
 
@@ -90,7 +87,7 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
 
             String friendsJsonStr = buffer.toString();
 
-            getFriendsFromJson(friendsJsonStr);
+            friends = getFriendsFromJson(friendsJsonStr);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
@@ -110,11 +107,13 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
             }
         }
 
-        return null;
+        return friends;
     }
 
-    private Void getFriendsFromJson(String friendsJsonStr) throws JSONException{
+    private ArrayList<Friend> getFriendsFromJson(String friendsJsonStr) throws JSONException{
         final String NAME = "name";
+
+        ArrayList<Friend> friendArrayList = new ArrayList<>();
 
         try {
             JSONObject friendsJson = new JSONObject(friendsJsonStr);
@@ -122,8 +121,6 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
             JSONArray userJsonArray = userJsonStr.getJSONArray("user");
 
             for (int i=0; i<userJsonArray.length(); i++){
-
-                mFriendsArray.add(userJsonArray.getJSONObject(i).getString(NAME));
 
                 JSONArray imageJson = userJsonArray.getJSONObject(i).getJSONArray("image");
 
@@ -134,23 +131,21 @@ public class FriendsLoader extends AsyncTaskLoader<Void> {
                     }
                 }
 
-                mFriendsImageUrlArray.add(imageURL);
+                friendArrayList.add(new Friend(userJsonArray.getJSONObject(i).getString(NAME), imageURL));
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
 
-        return null;
+        return friendArrayList;
     }
 
     @Override
-    public void deliverResult(Void data) {
+    public void deliverResult(ArrayList<Friend> data) {
         super.deliverResult(data);
 
-        mArrayAdapter.clear();
-        for (int i=0; i<mFriendsArray.size(); i++){
-            mArrayAdapter.add(new Friend(mFriendsArray.get(i), mFriendsImageUrlArray.get(i)));
-        }
+
+
     }
 }

@@ -33,12 +33,12 @@ public class FriendsAdapter extends ArrayAdapter<Friend> {
         if (convertView == null)
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_friends_list, null);
 
-        ((TextView) convertView.findViewById(R.id.tv_friend_name)).setText(friend.friendName);
+        ((TextView) convertView.findViewById(R.id.tv_friend_name)).setText(friend.getFriendName());
         ImageView imageView = (ImageView) convertView.findViewById(R.id.iv_friend_icon);
 
-        if (!TextUtils.isEmpty(friend.friendImageURL))
+        if (!TextUtils.isEmpty(friend.getFriendImageURL()))
             Picasso.with(mContext)
-                    .load(friend.friendImageURL)
+                    .load(friend.getFriendImageURL())
                     .resize(100,100)
                     .centerCrop()
                     .into(imageView);

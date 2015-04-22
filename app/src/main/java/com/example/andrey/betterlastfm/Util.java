@@ -22,7 +22,20 @@ public class Util {
     public static final String SECRET = "5b332291ad05138bd2e441a22262e5b2";
     public static final String API_KEY = "f445e682840e750fc7c992898e868efb";
     public static final String ERROR = "Error";
+
+    public static final String PROFILE_BASE_URL_TEXT = "http://ws.audioscrobbler.com/2.0/?";
+    public static final String METHOD_TEXT = "method";
+    public static final String USER_TEXT = "user";
+    public static final String API_KEY_TEXT = "api_key";
+    public static final String FORMAT_TEXT = "format";
+    public static final String ARTIST_TEXT = "artist";
+
+    public static final String METHOD_ARTIST_GET_INFO = "artist.getInfo";
+
+    public static final String ARTIST_KEY = "artist";
     public static final String PREF_SCROBBLE_KEY = "pref_scrobble_key";
+    public static final String USERNAME_KEY = "username";
+
 
     public static String md5(String s) {
         final String MD5 = "MD5";
@@ -69,104 +82,13 @@ public class Util {
 
     }
 
-    public static void setListViewHeightBasedOnChildren(Context context, ListView listView) {
-        ListAdapter listAdapter = listView.getAdapter();
-        if (listAdapter == null)
-            return;
-
-        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
-        int totalHeight = 0;
-        View view = null;
-        for (int i = 0; i < listAdapter.getCount(); i++) {
-            view = listAdapter.getView(i, view, listView);
-            if (i == 0)
-                view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, RadioGroup.LayoutParams.WRAP_CONTENT));
-
-            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-            totalHeight += view.getMeasuredHeight();
+    public static void setMargins (View v, int l, int t, int r, int b) {
+        if (v.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            p.setMargins(l, t, r, b);
+            v.requestLayout();
         }
-        ViewGroup.LayoutParams params = listView.getLayoutParams();
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount()));
-        listView.setLayoutParams(params);
-        listView.requestLayout();
     }
 
-    public static void setListViewHeightBasedOnChildren(Context context, GridView gridView1) {
-        ListAdapter listAdapter = gridView1.getAdapter();
-        if (listAdapter == null)
-            return;
 
-        int desiredWidth = View.MeasureSpec.makeMeasureSpec(gridView1.getWidth(), View.MeasureSpec.UNSPECIFIED);
-        int totalHeight = 0;
-        View view = null;
-
-        int bestOfThreeHeight;
-        int rowCounter = 0;
-
-        if (listAdapter.getCount() == 0)
-            return;
-
-        for (int i = 0; i < 3; i++) {
-            bestOfThreeHeight = 0;
-
-            for (int j=0; j<3; j++){
-                view = listAdapter.getView(rowCounter, view, gridView1);
-                if (i == 0)
-                    view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, RadioGroup.LayoutParams.WRAP_CONTENT));
-
-                view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-                int temp = view.getMeasuredHeight();
-
-                if (temp > bestOfThreeHeight)
-                    bestOfThreeHeight = temp;
-
-                rowCounter++;
-            }
-
-            //rowCounter = rowCounter + 3;
-            totalHeight += bestOfThreeHeight + context.getResources().getDimension(R.dimen.grid_list_padding);
-        }
-
-
-//        for (int i = 0; i < listAdapter.getCount(); i++) {
-//            view = listAdapter.getView(i, view, gridView1);
-//            if (i == 0)
-//                view.setLayoutParams(new ViewGroup.LayoutParams(desiredWidth, RadioGroup.LayoutParams.WRAP_CONTENT));
-//
-//            view.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-//            totalHeight += view.getMeasuredHeight();
-//        }
-        ViewGroup.LayoutParams params = gridView1.getLayoutParams();
-        params.height = totalHeight;
-        gridView1.setLayoutParams(params);
-        gridView1.requestLayout();
-    }
-
-    public void setGridViewHeightBasedOnChildren(GridView gridView, int columns) {
-        ListAdapter listAdapter = gridView.getAdapter();
-        if (listAdapter == null) {
-            // pre-condition
-            return;
-        }
-
-        int totalHeight = 0;
-        int items = listAdapter.getCount();
-        int rows = 0;
-
-        View listItem = listAdapter.getView(0, null, gridView);
-        listItem.measure(0, 0);
-        totalHeight = listItem.getMeasuredHeight();
-
-        float x = 1;
-        if( items > columns ){
-            x = items/columns;
-            rows = (int) (x + 1);
-            totalHeight *= rows;
-        }
-
-        ViewGroup.LayoutParams params = gridView.getLayoutParams();
-        params.height = totalHeight;
-        gridView.setLayoutParams(params);
-
-    }
 }

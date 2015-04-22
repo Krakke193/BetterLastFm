@@ -29,7 +29,7 @@ import java.util.ArrayList;
 /**
  * Created by Andrey on 08.04.2015.
  */
-public class RecentTracksLoader extends AsyncTaskLoader<Void> {
+public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> {
     private final String LOG_TAG = RecentTracksLoader.class.getSimpleName();
 
     private Context mContext;
@@ -47,12 +47,12 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
     }
 
     @Override
-    public Void loadInBackground() {
+    public ArrayList<RecentTrack> loadInBackground() {
         String profileRecentTracksJsonStr;
 
         String user = mUserName;
         String format = "json";
-        String apiKey = "90167bec56ea0d23c263e7a59a395eb2";
+        String apiKey = Util.API_KEY;
 
         String methodTypeRecentTracks = "user.getrecenttracks";
 
@@ -96,7 +96,7 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
 
             profileRecentTracksJsonStr = buffer.toString();
 
-            getRecentTracksFromJson(profileRecentTracksJsonStr);
+            mProfileRecentTracks = getRecentTracksFromJson(profileRecentTracksJsonStr);
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
@@ -118,14 +118,14 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
             }
         }
 
-        return null;
+        return mProfileRecentTracks;
     }
 
-    private void getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
+    private ArrayList<RecentTrack> getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
         final String ARTIST = "#text";
         final String NAME = "name";
 
-        mProfileRecentTracks.clear();
+        ArrayList<RecentTrack> recentTrackArrayList = new ArrayList<>();
 
         try {
             JSONObject tracksJson = new JSONObject(tracksJsonStr);
@@ -150,7 +150,7 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
                     recentTrackDate = "Now playing";
                 }
 
-                mProfileRecentTracks.add(new RecentTrack(
+                recentTrackArrayList.add(new RecentTrack(
                         recentTracksArr.getJSONObject(i).getString(NAME),
                         recentTracksArr.getJSONObject(i).getJSONObject("artist").getString(ARTIST),
                         "",
@@ -177,15 +177,15 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
 
                 for (int i = 9; i >= 0; i--){
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
-                            mProfileRecentTracks.get(i).getTrackImageURL());
+                            recentTrackArrayList.get(i).getTrackImageURL());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST,
-                            mProfileRecentTracks.get(i).getTrackArtist());
+                            recentTrackArrayList.get(i).getTrackArtist());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME,
-                            mProfileRecentTracks.get(i).getTrackName());
+                            recentTrackArrayList.get(i).getTrackName());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ALBUM,
-                            mProfileRecentTracks.get(i).getAlbum());
+                            recentTrackArrayList.get(i).getAlbum());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP,
-                            mProfileRecentTracks.get(i).getTrackDate());
+                            recentTrackArrayList.get(i).getTrackDate());
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
 
                     mContext.getContentResolver()
@@ -198,17 +198,14 @@ public class RecentTracksLoader extends AsyncTaskLoader<Void> {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
+
+        return recentTrackArrayList;
     }
 
     @Override
-    public void deliverResult(Void data) {
+    public void deliverResult(ArrayList<RecentTrack> data) {
         super.deliverResult(data);
 
-        mListAdapter.clear();
 
-        Log.d(LOG_TAG, Integer.toString(mProfileRecentTracks.size()));
-        for(int i=0; i<10; i++) {
-            mListAdapter.add(mProfileRecentTracks.get(i));
-        }
     }
 }

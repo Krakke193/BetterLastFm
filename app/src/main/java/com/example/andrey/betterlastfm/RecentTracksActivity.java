@@ -29,7 +29,7 @@ import com.example.andrey.betterlastfm.loaders.RecentTracksLoader;
 import java.util.ArrayList;
 
 
-public class RecentTracksActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Void>{
+public class RecentTracksActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<ArrayList<RecentTrack>>{
     private static final String LOG_TAG = RecentTracksActivity.class.getSimpleName();
 
     private String mUserName;
@@ -187,7 +187,7 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
     }
 
     @Override
-    public Loader<Void> onCreateLoader(int id, Bundle args) {
+    public Loader<ArrayList<RecentTrack>> onCreateLoader(int id, Bundle args) {
 //        SharedPreferences sharedPref = getSharedPreferences("com.example.andrey.betterlastfm", Context.MODE_PRIVATE);
 //        String username = sharedPref.getString("username", "Error");
 //
@@ -200,14 +200,22 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
     }
 
     @Override
-    public void onLoadFinished(Loader<Void> loader, Void data) {
+    public void onLoadFinished(Loader<ArrayList<RecentTrack>> loader, ArrayList<RecentTrack> data) {
         Log.d(LOG_TAG, "Finished loading.");
+
+        mListAdapter.clear();
+
+        Log.d(LOG_TAG, Integer.toString(data.size()));
+        for(int i=0; i<10; i++) {
+            mListAdapter.add(data.get(i));
+        }
+
         bar.setVisibility(View.GONE);
         getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override
-    public void onLoaderReset(Loader<Void> loader) {
+    public void onLoaderReset(Loader<ArrayList<RecentTrack>> loader) {
 
     }
 }

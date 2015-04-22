@@ -11,6 +11,20 @@
 
     </style>
 
+    <style name="AppTheme.Translucent.Bar" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Main theme colors -->
+        <!--   your app branding color for the app bar -->
+        <item name="android:colorPrimary">@color/lastfm_red</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="android:colorPrimaryDark">@color/lastfm_red_dark</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+
+    </style>
+
+
+
 </resources>
 
     <!--   theme UI controls like checkboxes and text fields -->

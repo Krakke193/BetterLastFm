@@ -15,42 +15,43 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-
             </intent-filter>
-
         </activity>
 
         <activity
             android:name=".ProfileActivity"
             android:label="@string/app_name" >
-
         </activity>
 
         <activity
             android:name=".FriendsActivity"
             android:label="@string/title_activity_friends"
+            android:parentActivityName=".ProfileActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ProfileActivity" />
+        </activity>
+
+        <activity
+            android:name=".ArtistActivity"
             android:parentActivityName=".ProfileActivity"
-            android:theme="@style/Base.Theme.AppCompat.Light.DarkActionBar" >
+            android:theme="@style/AppTheme.Translucent.Bar">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ProfileActivity" />
-
         </activity>
 
         <activity
             android:name=".RecentTracksActivity"
             android:label="@string/title_activity_recent_tracks"
             android:parentActivityName=".ProfileActivity" >
-            
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ProfileActivity" />
-
         </activity>
 
         <provider

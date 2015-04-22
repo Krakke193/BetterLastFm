@@ -6,12 +6,18 @@
     <dimen name="card_container_margin">10dp</dimen>
     <dimen name="card_between_space_margin">10dp</dimen>
 
+    <dimen name="cards_dimen">8dp</dimen>
     <dimen name="header_margin">8dp</dimen>
+    <dimen name="base_app_padding">16dp</dimen>
     <dimen name="grid_list_padding">5dp</dimen>
     <dimen name="nav_drawer_width">320dp</dimen>
+
+    <dimen name="all_info_text_size">17sp</dimen>
 
     <dimen name="list_item">45dp</dimen>
     <dimen name="iv_width_grid">150dp</dimen>
     <dimen name="iv_height_grid">105dp</dimen>
     <dimen name="tv_height_grid">20dp</dimen>
+
+    <dimen name="parallax_image_height">180dp</dimen>
 </resources>
