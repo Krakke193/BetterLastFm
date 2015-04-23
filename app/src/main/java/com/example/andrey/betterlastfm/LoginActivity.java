@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.loaders.SessionKeyLoader;
 
@@ -91,8 +92,10 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
-        if (sharedPreferences.contains("username") && sharedPreferences.contains("api_signature"))
+        if (sharedPreferences.contains("username") && sharedPreferences.contains("api_signature")){
+            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, ProfileActivity.class));
+        }
     }
 
     @Override

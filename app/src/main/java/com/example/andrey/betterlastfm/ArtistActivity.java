@@ -165,6 +165,12 @@ public class ArtistActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        getLoaderManager().getLoader(0).stopLoading();
+    }
+
+    @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         onScrollChanged(mScrollView.getCurrentScrollY(), false, false);

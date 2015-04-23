@@ -3,11 +3,7 @@ package com.example.andrey.betterlastfm.model;
 /**
  * Created by Andrey on 08.04.2015.
  */
-public class RecentTrack {
-
-    private String trackName;
-    private String trackArtist;
-    private String trackImageURL;
+public class RecentTrack extends Track{
     private String trackDate;
     private String album;
 
@@ -23,6 +19,7 @@ public class RecentTrack {
     public String toString() {
         return getTrackName() + " - " + getTrackArtist();
     }
+
 
     public String getTrackName() {
         return trackName;

@@ -15,7 +15,7 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <TextView
@@ -34,7 +34,7 @@
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_marginLeft="@dimen/card_between_space_margin"
-            android:gravity="center_vertical"/>
+            android:gravity="top"/>
 
     </LinearLayout>
 

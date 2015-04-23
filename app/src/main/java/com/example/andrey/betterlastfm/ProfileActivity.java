@@ -126,6 +126,14 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             );
 
             cursor.close();
+        } else {
+            try {
+                bar.setVisibility(View.VISIBLE);
+                getLoaderManager().getLoader(0).forceLoad();
+            } catch (Exception e) {
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -384,8 +392,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         };
         mDrawer.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
-
-
     }
 
     @Override
