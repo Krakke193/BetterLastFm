@@ -31,7 +31,6 @@ public class RecentTracksProvider extends ContentProvider {
     public static final String TRACKS_CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd."
             + AUTHORITY + "." + TRACKS_PATH;
 
-    //// UriMatcher
     // общий Uri
     public static final int URI_TRACKS = 1;
     // Uri с указанным ID
@@ -47,7 +46,6 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        //Log.d(LOG_TAG, "Content provider has been created!");
         mProfileDbHelper = new ProfileDbHelper(getContext());
         return true;
     }
@@ -55,13 +53,10 @@ public class RecentTracksProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
-        //Log.d(LOG_TAG, "query, " + uri.toString());
         switch (uriMatcher.match(uri)){
             case URI_TRACKS:
-                //Log.d(LOG_TAG, "URI_TRACKS");
                 break;
             case URI_TRACKS_ID:
-                //Log.d(LOG_TAG, "URI_TRACKS_ID");
                 String id = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
                     selection = ProfileContract.RecentTracksEntry._ID + " = " + id;
@@ -90,7 +85,6 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
-        //Log.d(LOG_TAG, "getType, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_TRACKS:
                 return TRACKS_CONTENT_TYPE;
@@ -102,7 +96,6 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        //Log.d(LOG_TAG, "insert, " + uri.toString());
         if (uriMatcher.match(uri) != URI_TRACKS)
             throw new IllegalArgumentException("Wrong URI: " + uri);
 
@@ -119,14 +112,11 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        //Log.d(LOG_TAG, "delete, " + uri.toString());
         switch (uriMatcher.match(uri)) {
             case URI_TRACKS:
-                //Log.d(LOG_TAG, "URI_CONTACTS");
                 break;
             case URI_TRACKS_ID:
                 String id = uri.getLastPathSegment();
-                //Log.d(LOG_TAG, "URI_CONTACTS_ID, " + id);
                 if (TextUtils.isEmpty(selection)) {
                     selection = ProfileContract.RecentTracksEntry._ID  + " = " + id;
                 } else {

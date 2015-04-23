@@ -155,7 +155,6 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
 
             if (cursor.moveToFirst()) {
-                int i = 0;
                 do {
 
                     recentTracks.add(new RecentTrack(
@@ -188,14 +187,6 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
 
     @Override
     public Loader<ArrayList<RecentTrack>> onCreateLoader(int id, Bundle args) {
-//        SharedPreferences sharedPref = getSharedPreferences("com.example.andrey.betterlastfm", Context.MODE_PRIVATE);
-//        String username = sharedPref.getString("username", "Error");
-//
-//        if (username.equals("Error")){
-//            Toast.makeText(this, "Ooops! try relogin in app!", Toast.LENGTH_SHORT).show();
-//            return null;
-//        }
-
         return new RecentTracksLoader(this, mListAdapter, mUserName);
     }
 

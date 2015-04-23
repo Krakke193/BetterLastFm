@@ -5,8 +5,6 @@
     android:layout_height="match_parent"
     android:elevation="7dp">
 
-
-
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -23,7 +21,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/scrollView"
-            android:padding="@dimen/cards_dimen">
+            android:paddingTop="@dimen/cards_dimen"
+            android:paddingStart="@dimen/padding_tablet_app"
+            android:paddingLeft="@dimen/padding_tablet_app"
+            android:paddingRight="@dimen/padding_tablet_app">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -224,15 +225,13 @@
                             android:background="@color/material_blue_grey_800"/>
                     </FrameLayout>
 
-
-
-                    </LinearLayout>
-
                 </LinearLayout>
+
             </LinearLayout>
-        </ScrollView>
 
+        </LinearLayout>
 
+    </ScrollView>
 
     </RelativeLayout>
 
@@ -310,18 +309,8 @@
             android:scrollbars="vertical">
 
         </ListView>
+
     </LinearLayout>
-
-    <!--<android.support.v7.widget.RecyclerView-->
-        <!--android:id="@+id/recycler_view"-->
-        <!--android:layout_width="320dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="left"-->
-
-        <!--android:background="#ffffff"-->
-        <!--android:scrollbars="vertical">-->
-
-    <!--</android.support.v7.widget.RecyclerView>-->
 
 </android.support.v4.widget.DrawerLayout>
 

@@ -45,7 +45,7 @@ public class ArtistLoader extends AsyncTaskLoader<Artist> {
         BufferedReader reader = null;
 
         try {
-            Uri builtUri = Uri.parse(Util.PROFILE_BASE_URL_TEXT).buildUpon()
+            Uri builtUri = Uri.parse(Util.PROFILE_BASE_URL).buildUpon()
                     .appendQueryParameter(Util.METHOD_TEXT, Util.METHOD_ARTIST_GET_INFO)
                     .appendQueryParameter(Util.ARTIST_TEXT, mArtistName)
                     .appendQueryParameter(Util.USER_TEXT, userName)
@@ -79,8 +79,6 @@ public class ArtistLoader extends AsyncTaskLoader<Artist> {
             e.printStackTrace();
             Log.e(LOG_TAG, e.toString());
         }
-
-
 
         return mArtist;
     }

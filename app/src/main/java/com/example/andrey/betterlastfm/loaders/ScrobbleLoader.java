@@ -91,7 +91,6 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
             profileRecentTracks = limitedRecentTracks;
         }
 
-
         final String BASE_URL = "https://ws.audioscrobbler.com/2.0/";
         final String METHOD = "method";
         final String FORMAT = "format";
@@ -110,14 +109,40 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
         String sessionKey = shrdPrfs.getString("session_key", "ERROR");
 
         for (int i=0; i<profileRecentTracks.size(); i++){
-            tmpAlbumsForMD5 += "album" + "[" + Integer.toString(i) + "]" + profileRecentTracks.get(i).getAlbum();
-            tmpArtistsForMD5 += "artist" + "[" + Integer.toString(i) + "]" + profileRecentTracks.get(i).getTrackArtist();
-            tmpTimestampsForMD5 += "timestamp" + "[" + Integer.toString(i) + "]" + profileRecentTracks.get(i).getTrackDate();
-            tmpTracksForMD5 += "track" + "[" + Integer.toString(i) + "]" + profileRecentTracks.get(i).getTrackName();
+            tmpAlbumsForMD5 += "album" +
+                    "[" +
+                    Integer.toString(i) +
+                    "]" +
+                    profileRecentTracks.get(i).getAlbum();
+
+            tmpArtistsForMD5 += "artist" +
+                    "[" +
+                    Integer.toString(i) +
+                    "]" +
+                    profileRecentTracks.get(i).getTrackArtist();
+
+            tmpTimestampsForMD5 += "timestamp" +
+                    "[" +
+                    Integer.toString(i) +
+                    "]" +
+                    profileRecentTracks.get(i).getTrackDate();
+
+            tmpTracksForMD5 += "track" +
+                    "[" +
+                    Integer.toString(i) +
+                    "]" +
+                    profileRecentTracks.get(i).getTrackName();
         }
 
-        tmpStringForMD5 = tmpAlbumsForMD5.replaceAll("null", "") + "api_key" + mApiKey + tmpArtistsForMD5.replaceAll("null", "") + "method" + method +
-                "sk" + sessionKey + tmpTimestampsForMD5.replaceAll("null", "") + tmpTracksForMD5.replaceAll("null", "") + Util.SECRET;
+        tmpStringForMD5 = tmpAlbumsForMD5.replaceAll("null", "") +
+                "api_key" + mApiKey +
+                tmpArtistsForMD5.replaceAll("null", "") +
+                "method" + method +
+                "sk" + sessionKey +
+                tmpTimestampsForMD5.replaceAll("null", "") +
+                tmpTracksForMD5.replaceAll("null", "") +
+                Util.SECRET;
+
         tmpAlbumsForMD5 = "";
         tmpArtistsForMD5 = "";
         tmpTracksForMD5 = "";
@@ -164,9 +189,6 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
                     profileRecentTracks.get(i).getTrackDate())
             );
 
-//            Log.d(LOG_TAG, "artist" + "[" + Integer.toString(i) + "]" + artists.get(i));
-//            Log.d(LOG_TAG, "track" + "[" + Integer.toString(i) + "]" + tracks.get(i));
-//            Log.d(LOG_TAG, "timestamp" + "[" + Integer.toString(i) + "]" + timestamps.get(i));
             scrobbledTracksCount++;
         }
 
@@ -199,8 +221,6 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
             String jsonStr = buffer.toString();
 
             errFlag = isErrorGetFromJson(jsonStr);
-
-
 
             Log.d(LOG_TAG, jsonStr);
         } catch (ClientProtocolException e) {
@@ -243,7 +263,10 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
                     .show();
             ContentValues contentValues = new ContentValues();
             contentValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
-            int cnt = mContext.getContentResolver().update(RecentTracksProvider.TRACKS_CONTENT_URI, contentValues, null, null);
+            int cnt = mContext
+                    .getContentResolver()
+                    .update(RecentTracksProvider.TRACKS_CONTENT_URI, contentValues, null, null);
+
             Log.d(LOG_TAG, "Scrobble status removed from " + Integer.toString(cnt) + " rows");
         }
     }

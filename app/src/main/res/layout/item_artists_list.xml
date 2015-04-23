@@ -31,7 +31,7 @@
                 android:layout_weight="5"
                 android:layout_width="0dp"
                 android:layout_height="fill_parent"
-                android:paddingLeft="@dimen/grid_list_padding"
+                android:paddingLeft="@dimen/padding_lists"
                 android:gravity="bottom"
                 android:textSize="15sp" />
 
@@ -59,9 +59,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="@dimen/grid_list_padding"
-                android:paddingLeft="@dimen/grid_list_padding"
-                android:paddingRight="@dimen/grid_list_padding"
+                android:layout_marginLeft="@dimen/padding_lists"
+                android:paddingLeft="@dimen/padding_lists"
+                android:paddingRight="@dimen/padding_lists"
                 android:background="@color/material_blue_grey_800"/>
         </FrameLayout>
 

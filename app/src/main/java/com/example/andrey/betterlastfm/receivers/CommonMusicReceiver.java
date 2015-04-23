@@ -27,7 +27,10 @@ public class CommonMusicReceiver extends BroadcastReceiver {
         if (!storedTrack.equals(originalIntent.getStringExtra("track"))){
             Log.d(LOG_TAG, "playing");
             Log.d(LOG_TAG, originalIntent.getAction());
-            Log.d(LOG_TAG, "Player name: " + originalIntent.getAction().substring(0, originalIntent.getAction().lastIndexOf('.')));
+            Log.d(LOG_TAG, "Player name: " + originalIntent
+                    .getAction()
+                    .substring(0, originalIntent.getAction().lastIndexOf('.')));
+
             Log.d(LOG_TAG, "Track name: " + originalIntent.getStringExtra("track"));
             Log.d(LOG_TAG, "Artist name: " + originalIntent.getStringExtra("artist"));
             Log.d(LOG_TAG, "Album name: " + originalIntent.getStringExtra("album"));

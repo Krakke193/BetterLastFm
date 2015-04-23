@@ -92,13 +92,26 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 null,
                 null
         );
-        int profileIconURL = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_ICON_URL);
-        int profileName = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_NAME);
-        int profileRealName = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_REAL_NAME);
-        int profileAge = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_AGE);
-        int profileCountry = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_COUNTRY);
-        int profilePlaycount = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_PLAYCOUNT);
-        int profileRegDate = cursor.getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_REGISTRY_DATE);
+        int profileIconURL = cursor
+                .getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_ICON_URL);
+
+        int profileName = cursor
+                .getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_NAME);
+
+        int profileRealName = cursor
+                .getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_REAL_NAME);
+
+        int profileAge = cursor
+                .getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_AGE);
+
+        int profileCountry = cursor
+                .getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_COUNTRY);
+
+        int profilePlaycount = cursor
+                .getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_PLAYCOUNT);
+
+        int profileRegDate = cursor
+                .getColumnIndex(ProfileContract.HeaderEntry.COLUMN_HEADER_REGISTRY_DATE);
 
         if (cursor.moveToFirst()){
             Picasso.with(this).load(cursor.getString(profileIconURL)).into(ivProfilePic);
@@ -124,10 +137,14 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                     null,
                     ProfileContract.RecentTracksEntry._ID + " " + "DESC");
 
-            int recentTrackArtistIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
-            int recentTrackNameIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
-            int recentTrackDateIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
-            int recentTrackURLIndex = cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
+            int recentTrackArtistIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ARTIST);
+            int recentTrackNameIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_NAME);
+            int recentTrackDateIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
+            int recentTrackURLIndex = cursor
+                    .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
 
 
             if (cursor.moveToFirst()){
@@ -313,17 +330,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             }
         });
 
-//        artistsListLinearLayout.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                TextView temp = (TextView) v.findViewById(R.id.artists_list_name_textview);
-//                startActivity(new Intent(getApplicationContext(), ArtistActivity.class)
-//                        .putExtra(Util.ARTIST_KEY, temp.getText())
-//                );
-//
-//            }
-//        });
-
         if (!mUserName.equals(mShrdPrefs.getString("username", "ERROR"))){
             try {
                 bar.setVisibility(View.VISIBLE);
@@ -333,7 +339,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 e.printStackTrace();
             }
         }
-
 
         // All with navigation drawer here:
 
@@ -419,7 +424,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             try {
                 bar.setVisibility(View.VISIBLE);
                 getLoaderManager().getLoader(0).forceLoad();
-                //getLoaderManager().getLoader(0).forceLoad();
             } catch (Exception e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
@@ -550,7 +554,11 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             ((TextView) view.findViewById(R.id.artists_list_plays_textview))
                     .setText(profileTopArtists.get(i).getArtistPlays());
 
-            float percentage = (Integer.parseInt(profileTopArtists.get(i).getArtistPlays().replaceAll("plays","")) * 100 / fullPlays);
+            float percentage = (Integer
+                    .parseInt(profileTopArtists.get(i)
+                            .getArtistPlays()
+                            .replaceAll("plays","")) * 100 / fullPlays
+            );
 
             ImageView relativeBar = (ImageView) view.findViewById(R.id.artists_relativebar_imageview);
 
@@ -583,13 +591,11 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             ProfileActivity.artistsListLinearLayout.addView(view);
         }
 
-        getLoaderManager().restartLoader(0, null, this);
+        getLoaderManager().getLoader(0).reset();
     }
 
     @Override
     public void onLoaderReset(Loader<Profile> loader) {
         Log.d(LOG_TAG, "Loader reseted?");
     }
-
-
 }

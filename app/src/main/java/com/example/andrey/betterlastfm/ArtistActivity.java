@@ -6,6 +6,7 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -25,6 +26,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.adapters.NavigationListAdapter;
 import com.example.andrey.betterlastfm.loaders.ArtistLoader;
@@ -36,10 +38,14 @@ import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 import com.squareup.picasso.Picasso;
 import com.nineoldandroids.view.ViewHelper;
 
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+
 /**
  * Created by Andrey on 21.04.2015.
  */
-public class ArtistActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Artist>, ObservableScrollViewCallbacks {
+public class ArtistActivity extends ActionBarActivity
+        implements LoaderManager.LoaderCallbacks<Artist>, ObservableScrollViewCallbacks {
     private final String LOG_TAG = ArtistActivity.class.getSimpleName();
 
     private ImageView mArtistPic;
@@ -65,46 +71,53 @@ public class ArtistActivity extends ActionBarActivity implements LoaderManager.L
 
         mArtistPic = (ImageView) findViewById(R.id.artists_list_imageview);
         mToolbarView = (Toolbar) findViewById(R.id.toolbar);
-        mToolbarView.setBackgroundColor(ScrollUtils.getColorWithAlpha(0,getResources().getColor(R.color.lastfm_red)));
+        mToolbarView.setBackgroundColor(ScrollUtils
+                .getColorWithAlpha(0,getResources().getColor(R.color.lastfm_red))
+        );
 
         mScrollView = (ObservableScrollView) findViewById(R.id.activity_scrollview);
         mScrollView.setScrollViewCallbacks(this);
 
         mParallaxImageHeight = getResources().getDimensionPixelSize(R.dimen.parallax_image_height);
-        //mParallaxImageHeight = fullWidth;
-
-
-        //toolbar.setVisibility(View.GONE);
 
         mShrdPrefs = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
-
 
         mArtistName = (TextView) findViewById(R.id.artist_page_name);
         mArtistListeners = (TextView) findViewById(R.id.artist_page_listeners);
         mArtistPlaycount = (TextView) findViewById(R.id.artist_page_playcount);
         mArtistTagHolder = (LinearLayout) findViewById(R.id.artist_page_tagholder);
         mArtistInfo = (AutoResizeTextView) findViewById(R.id.artist_page_artist_info);
-
         bar = (ProgressBar) findViewById(R.id.artist_progress_bar);
-
-
-
-
 
         ViewTreeObserver vto = mArtistPic.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
+
                 mArtistPic.getViewTreeObserver().removeOnPreDrawListener(this);
-                fullWidth = mArtistPic.getMeasuredWidth();
-                ViewGroup.LayoutParams params = mArtistPic.getLayoutParams();
-                params.height = fullWidth;
-                mParallaxImageHeight = fullWidth - 110;
-                mArtistPic.setLayoutParams(params);
+
+                switch (getResources().getConfiguration().orientation){
+                    case Configuration.ORIENTATION_PORTRAIT:
+                        fullWidth = mArtistPic.getMeasuredWidth();
+                        ViewGroup.LayoutParams params = mArtistPic.getLayoutParams();
+                        params.height = fullWidth;
+                        mParallaxImageHeight = fullWidth - 110;
+                        mArtistPic.setLayoutParams(params);
+                        break;
+
+                    case Configuration.ORIENTATION_LANDSCAPE:
+                        fullWidth = mArtistPic.getMeasuredWidth();
+                        ViewGroup.LayoutParams paramss = mArtistPic.getLayoutParams();
+                        paramss.height = fullWidth / 2;
+                        mParallaxImageHeight = fullWidth - 55;
+                        mArtistPic.setLayoutParams(paramss);
+                        break;
+                }
+
                 return true;
+
             }
         });
 
-        //bar.setVisibility(View.VISIBLE);
         getLoaderManager().initLoader(0, null, this).forceLoad();
 
         // Nav. drawer
@@ -130,7 +143,8 @@ public class ArtistActivity extends ActionBarActivity implements LoaderManager.L
         });
 
         DrawerLayout mDrawer = (DrawerLayout) findViewById(R.id.DrawerLayout);
-        ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawer , null, R.string.open_drawer,R.string.close_drawer){
+        ActionBarDrawerToggle mDrawerToggle =
+                new ActionBarDrawerToggle(this, mDrawer , null, R.string.open_drawer,R.string.close_drawer){
 
             @Override
             public void onDrawerOpened(View drawerView) {
@@ -158,10 +172,17 @@ public class ArtistActivity extends ActionBarActivity implements LoaderManager.L
 
     @Override
     public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {
-        int baseColor = getResources().getColor(R.color.lastfm_red);
-        float alpha = 1 - (float) Math.max(0, mParallaxImageHeight - scrollY) / mParallaxImageHeight;
-        mToolbarView.setBackgroundColor(ScrollUtils.getColorWithAlpha(alpha, baseColor));
-        //ViewHelper.setTranslationY(mArtistPic, scrollY / 2);
+        switch (getResources().getConfiguration().orientation){
+            case Configuration.ORIENTATION_PORTRAIT:
+                int baseColor = getResources().getColor(R.color.lastfm_red);
+                float alpha = 1 - (float) Math.max(0, mParallaxImageHeight - scrollY) / mParallaxImageHeight;
+                mToolbarView.setBackgroundColor(ScrollUtils.getColorWithAlpha(alpha, baseColor));
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                mToolbarView.setBackgroundColor(Color.TRANSPARENT);
+                ViewHelper.setTranslationY(mArtistPic, scrollY / 2);
+                break;
+        }
     }
 
     @Override
@@ -181,10 +202,16 @@ public class ArtistActivity extends ActionBarActivity implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Artist> loader, Artist data) {
-        Picasso.with(this).load(data.getArtistPic()).resize(fullWidth, fullWidth).centerCrop().into(mArtistPic);
+        try {
+            loadPic(data);
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+            Toast.makeText(this, "Something wrong, reload this page later!", Toast.LENGTH_SHORT)
+                    .show();
+        }
 
         mToolbarView.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        mToolbarView.setTitle(data.getArtistName());
+        mToolbarView.setTitle("");
         mToolbarView.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -199,7 +226,6 @@ public class ArtistActivity extends ActionBarActivity implements LoaderManager.L
         for (String tag : data.getArtistTags()){
             View view = LayoutInflater.from(this).inflate(R.layout.item_tag, null);
             TextView temp = (TextView) view.findViewById(R.id.item_tag_textview);
-            //TextView temp = new TextView(this);
             temp.setText(tag);
             temp.setBackgroundColor(Color.GRAY);
 
@@ -209,10 +235,35 @@ public class ArtistActivity extends ActionBarActivity implements LoaderManager.L
         mArtistInfo.setText(data.getArtistInfo());
 
         bar.setVisibility(View.GONE);
+
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override
     public void onLoaderReset(Loader<Artist> loader) {
+
+    }
+
+    private void loadPic (Artist data) throws FileNotFoundException{
+
+        switch (getResources().getConfiguration().orientation){
+            case Configuration.ORIENTATION_PORTRAIT:
+                Picasso.with(this)
+                        .load(data.getArtistPic())
+                        .resize(fullWidth, fullWidth)
+                        .centerCrop()
+                        .into(mArtistPic);
+
+                break;
+            case Configuration.ORIENTATION_LANDSCAPE:
+                Picasso.with(this)
+                        .load(data.getArtistPic())
+                        .resize(fullWidth, fullWidth / 2)
+                        .centerCrop()
+                        .into(mArtistPic);
+
+                break;
+        }
 
     }
 }

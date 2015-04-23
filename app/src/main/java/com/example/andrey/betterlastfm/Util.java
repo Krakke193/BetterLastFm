@@ -23,7 +23,7 @@ public class Util {
     public static final String API_KEY = "f445e682840e750fc7c992898e868efb";
     public static final String ERROR = "Error";
 
-    public static final String PROFILE_BASE_URL_TEXT = "http://ws.audioscrobbler.com/2.0/?";
+    public static final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
     public static final String METHOD_TEXT = "method";
     public static final String USER_TEXT = "user";
     public static final String API_KEY_TEXT = "api_key";
@@ -81,14 +81,5 @@ public class Util {
         Log.d(LOG_TAG, "Username: " + mPref.getString("username", "Error setting username"));
 
     }
-
-    public static void setMargins (View v, int l, int t, int r, int b) {
-        if (v.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            p.setMargins(l, t, r, b);
-            v.requestLayout();
-        }
-    }
-
 
 }

@@ -20,7 +20,8 @@ public class ArtistDeserializer implements JsonDeserializer<Artist> {
     private Artist artist;
 
     @Override
-    public Artist deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public Artist deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
         JsonObject artistJson = jsonObject.getAsJsonObject("artist");
 

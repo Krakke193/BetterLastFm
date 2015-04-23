@@ -39,7 +39,10 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
         sharedPreferences = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
         if (sharedPreferences.contains("username") && sharedPreferences.contains("session_key")){
             Log.d(LOG_TAG, "true!");
-            startActivity(new Intent(this, ProfileActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            startActivity(
+                    new Intent(this, ProfileActivity.class)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            );
         }
 
         Log.d(LOG_TAG,sharedPreferences.getString("username", "ERROR NO USERNAME"));

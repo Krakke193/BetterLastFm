@@ -31,15 +31,19 @@ public class TracksAdapter extends ArrayAdapter<RecentTrack> {
 
         View viewHolder = null;
         if (convertView == null) {
-
-            //View header = LayoutInflater.from(getContext()).inflate(R.layout.item_recent_tracks_list, null);
-
-
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_recent_tracks_list, null);
+            convertView = LayoutInflater
+                    .from(getContext())
+                    .inflate(R.layout.item_recent_tracks_list, null);
         }
 
-        ((TextView) convertView.findViewById(R.id.list_textview)).setText(recentTrack.getTrackArtist() + " - " + recentTrack.getTrackName());
-        ((TextView) convertView.findViewById(R.id.recent_tracks_list_date)).setText(recentTrack.getTrackDate());
+        ((TextView) convertView
+                .findViewById(R.id.list_textview))
+                .setText(recentTrack.getTrackArtist() + " - " + recentTrack.getTrackName());
+
+        ((TextView) convertView
+                .findViewById(R.id.recent_tracks_list_date))
+                .setText(recentTrack.getTrackDate());
+
         ImageView imageView = (ImageView) convertView.findViewById(R.id.list_imageview);
 
         if (!TextUtils.isEmpty(recentTrack.getTrackImageURL()))

@@ -121,7 +121,8 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
         return mProfileRecentTracks;
     }
 
-    private ArrayList<RecentTrack> getRecentTracksFromJson (String tracksJsonStr) throws JSONException{
+    private ArrayList<RecentTrack> getRecentTracksFromJson (String tracksJsonStr)
+            throws JSONException{
         final String ARTIST = "#text";
         final String NAME = "name";
 
@@ -144,7 +145,11 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
 
                 String recentTrackDate;
                 try {
-                    recentTrackDate = recentTracksArr.getJSONObject(i).getJSONObject("date").getString("#text");
+                    recentTrackDate = recentTracksArr
+                            .getJSONObject(i)
+                            .getJSONObject("date")
+                            .getString("#text");
+
                 } catch (JSONException e){
                     e.printStackTrace();
                     recentTrackDate = "Now playing";
@@ -157,12 +162,11 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
                         imageURL,
                         recentTrackDate
                 ));
-
-//                mProfileRecentTracksArrayURL.add(imageURL);
             }
 
-            SharedPreferences shrdPrfs =
-                    mContext.getSharedPreferences("com.example.andrey.betterlastfm",Context.MODE_PRIVATE);
+            SharedPreferences shrdPrfs = mContext
+                    .getSharedPreferences("com.example.andrey.betterlastfm",Context.MODE_PRIVATE);
+
             String username = shrdPrfs.getString("username", Util.ERROR);
             if (username.equals(Util.ERROR))
                 Toast.makeText(mContext, "Ooops! something went wrong!", Toast.LENGTH_SHORT).show();
@@ -172,8 +176,6 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
 
                 mContext.getContentResolver()
                         .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
-                //Log.d(LOG_TAG, "deleted " + deleted + "rows!");
-
 
                 for (int i = 9; i >= 0; i--){
                     recentTrackValues.put(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL,
@@ -190,8 +192,6 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
 
                     mContext.getContentResolver()
                             .insert(RecentTracksProvider.TRACKS_CONTENT_URI, recentTrackValues);
-
-                    //Log.d(LOG_TAG, "insert, result Uri : " + newUri.toString());
                 }
             }
         } catch (JSONException e) {
@@ -205,7 +205,5 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
     @Override
     public void deliverResult(ArrayList<RecentTrack> data) {
         super.deliverResult(data);
-
-
     }
 }

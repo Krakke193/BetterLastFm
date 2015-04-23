@@ -58,8 +58,6 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
     private ArrayList<RecentTrack> mProfileRecentTracks = new ArrayList<>();
     private ArrayList<TopArtist> mProfileTopArtists = new ArrayList<>();
 
-    //private String[] profileHeaderArray = new String[7];
-
     public ProfileLoader(Context context, String userName){
         super(context);
         this.mContext = context;
@@ -121,13 +119,21 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             );
 
             ContentValues headerValues = new ContentValues();
-            headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_ICON_URL, profileHeaderArray.get(0));
-            headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_NAME, profileHeaderArray.get(1));
-            headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_REAL_NAME, profileHeaderArray.get(2));
-            headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_AGE, profileHeaderArray.get(3));
-            headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_COUNTRY, profileHeaderArray.get(4));
-            headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_PLAYCOUNT, profileHeaderArray.get(5));
-            headerValues.put(ProfileContract.HeaderEntry.COLUMN_HEADER_REGISTRY_DATE, profileHeaderArray.get(6));
+            headerValues
+                    .put(ProfileContract.HeaderEntry.COLUMN_HEADER_ICON_URL, profileHeaderArray.get(0));
+            headerValues
+                    .put(ProfileContract.HeaderEntry.COLUMN_HEADER_NAME, profileHeaderArray.get(1));
+            headerValues
+                    .put(ProfileContract.HeaderEntry.COLUMN_HEADER_REAL_NAME, profileHeaderArray.get(2));
+            headerValues
+                    .put(ProfileContract.HeaderEntry.COLUMN_HEADER_AGE, profileHeaderArray.get(3));
+            headerValues
+                    .put(ProfileContract.HeaderEntry.COLUMN_HEADER_COUNTRY, profileHeaderArray.get(4));
+            headerValues
+                    .put(ProfileContract.HeaderEntry.COLUMN_HEADER_PLAYCOUNT, profileHeaderArray.get(5));
+            headerValues
+                    .put(ProfileContract.HeaderEntry.COLUMN_HEADER_REGISTRY_DATE, profileHeaderArray.get(6));
+            
             mDbWrite.insert(ProfileContract.HeaderEntry.TABLE_NAME, null, headerValues);
         }
         return profileHeaderArray;
@@ -161,7 +167,11 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
 
                 String recentTrackDate;
                 try {
-                    recentTrackDate = recentTracksArr.getJSONObject(i).getJSONObject("date").getString("#text");
+                    recentTrackDate = recentTracksArr
+                            .getJSONObject(i)
+                            .getJSONObject("date")
+                            .getString("#text");
+
                 } catch (JSONException e){
                     e.printStackTrace();
                     recentTrackDate = "Now playing";
@@ -217,7 +227,8 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
      * @param topArtistsJsonStr
      * @return profileTopArtists
      */
-    private ArrayList<TopArtist> getTopArtistsFromJson (String topArtistsJsonStr) throws JSONException{
+    private ArrayList<TopArtist> getTopArtistsFromJson (String topArtistsJsonStr)
+            throws JSONException{
         final String ARTIST_NAME = "name";
         final String PLAYCOUNT = "playcount";
 
@@ -232,7 +243,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
 
                 String imageURL = null;
                 for (int j=0; j < imageJson.length(); j++){
-                    if (imageJson.getJSONObject(j).getString("size").equals("mega")){
+                    if (imageJson.getJSONObject(j).getString("size").equals("medium")){
                         imageURL = imageJson.getJSONObject(j).getString("#text");
                     }
                 }
@@ -250,7 +261,6 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
 
         //Database insertion!
 
-        int counter = 0;
         if (mUserName.equals("se0ko")){
             mDbWrite.delete(
                     ProfileContract.TopArtistsEntry.TABLE_NAME,
@@ -261,18 +271,24 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             ContentValues topArtistsValues = new ContentValues();
 
             for (int i = 0; i < profileTopArtists.size(); i++){
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_ICON_URL, profileTopArtists.get(i).getArtistPicURL());
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_NAME, profileTopArtists.get(i).getArtistName());
-                topArtistsValues.put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT, profileTopArtists.get(i).getArtistPlays());
+                topArtistsValues
+                        .put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_ICON_URL,
+                                profileTopArtists.get(i).getArtistPicURL());
+
+                topArtistsValues
+                        .put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_NAME,
+                                profileTopArtists.get(i).getArtistName());
+
+                topArtistsValues
+                        .put(ProfileContract.TopArtistsEntry.COLUMN_ARTIST_PLAYCOUNT,
+                                profileTopArtists.get(i).getArtistPlays());
 
                 mDbWrite.insert(
                         ProfileContract.TopArtistsEntry.TABLE_NAME,
                         null,
                         topArtistsValues
                 );
-                counter++;
             }
-            //Log.d(LOG_TAG, "Inserted " + counter + " artists rows");
         }
 
         return profileTopArtists;
@@ -315,6 +331,8 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
                     .appendQueryParameter(FORMAT, format)
                     .build();
             URL url = new URL(builtUri.toString());
+
+            Log.d(LOG_TAG, url.toString());
 
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
@@ -366,13 +384,15 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             final String USER = "user";
             final String API_KEY = "api_key";
             final String FORMAT = "format";
-            Uri builtUri = Uri.parse(PROFILE_BASE_URL).buildUpon()
+            Uri builtUri = Uri.parse(Util.PROFILE_BASE_URL).buildUpon()
                     .appendQueryParameter(METHOD_TYPE, methodTypeRecentTracks)
                     .appendQueryParameter(USER, user)
                     .appendQueryParameter(API_KEY, apiKey)
                     .appendQueryParameter(FORMAT, format)
                     .build();
             URL url = new URL(builtUri.toString());
+
+            Log.d(LOG_TAG, url.toString());
 
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
@@ -433,6 +453,8 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
                     .appendQueryParameter(FORMAT, format)
                     .build();
             URL url = new URL(builtUri.toString());
+
+            Log.d(LOG_TAG, url.toString());
 
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");

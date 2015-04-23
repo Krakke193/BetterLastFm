@@ -131,7 +131,8 @@ public class FriendsLoader extends AsyncTaskLoader<ArrayList<Friend>> {
                     }
                 }
 
-                friendArrayList.add(new Friend(userJsonArray.getJSONObject(i).getString(NAME), imageURL));
+                friendArrayList.add(
+                        new Friend(userJsonArray.getJSONObject(i).getString(NAME), imageURL));
             }
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -144,8 +145,5 @@ public class FriendsLoader extends AsyncTaskLoader<ArrayList<Friend>> {
     @Override
     public void deliverResult(ArrayList<Friend> data) {
         super.deliverResult(data);
-
-
-
     }
 }

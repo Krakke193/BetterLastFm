@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/DrawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="7dp">
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.github.ksoichiro.android.observablescrollview.ObservableScrollView
+            xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/activity_scrollview"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:scaleType="fitXY"
+                        android:id="@+id/artists_list_imageview"
+                        android:transitionName="artistPic"
+                        android:src="@drawable/female"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="200dp">
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/cards_dimen"
+                            android:paddingLeft="@dimen/padding_land_app"
+                            android:paddingRight="@dimen/padding_land_app">
+
+                            <android.support.v7.widget.CardView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                card_view:cardElevation="2sp"
+                                card_view:cardUseCompatPadding="true">
+
+                                <LinearLayout
+                                    android:orientation="vertical"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content">
+
+                                    <TextView
+                                        android:id="@+id/artist_page_name"
+                                        android:text="Artist name"
+                                        android:textColor="@color/background_floating_material_dark"
+                                        android:gravity="center"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="@dimen/padding_lists"
+                                        android:textSize= "25sp"/>
+
+                                    <LinearLayout
+                                        android:orientation="horizontal"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:divider="@color/background_floating_material_dark"
+                                        android:showDividers="middle">
+
+                                        <TextView
+                                            android:id="@+id/artist_page_listeners"
+                                            android:gravity="center"
+                                            android:textSize="@dimen/all_info_text_size"
+                                            android:textColor="@color/background_floating_material_dark"
+                                            android:layout_weight="1"
+                                            android:layout_width="0dp"
+                                            android:layout_height="wrap_content"
+                                            android:padding="@dimen/padding_lists"/>
+
+                                        <TextView
+                                            android:id="@+id/artist_page_playcount"
+                                            android:gravity="center"
+                                            android:textSize="@dimen/all_info_text_size"
+                                            android:textColor="@color/background_floating_material_dark"
+                                            android:layout_weight="1"
+                                            android:layout_width="0dp"
+                                            android:layout_height="wrap_content"
+                                            android:padding="@dimen/padding_lists"/>
+
+                                    </LinearLayout>
+
+                                </LinearLayout>
+
+                            </android.support.v7.widget.CardView>
+
+                        </FrameLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/cards_dimen"
+                            android:paddingLeft="@dimen/padding_land_app"
+                            android:paddingRight="@dimen/padding_land_app">
+
+                            <android.support.v7.widget.CardView
+                                android:layout_height="wrap_content"
+                                android:layout_width="match_parent"
+                                card_view:cardElevation="2sp"
+                                card_view:cardUseCompatPadding="true">
+
+                                <LinearLayout
+                                    android:orientation="vertical"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content">
+
+                                    <TextView
+                                        android:text="@string/text_top_tags"
+                                        android:textColor="@color/background_floating_material_dark"
+                                        android:textSize="@dimen/all_info_text_size"
+                                        android:gravity="center"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content" />
+
+                                    <HorizontalScrollView
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="@dimen/padding_base_app"
+                                        android:scrollbars="none">
+
+                                        <LinearLayout
+                                            android:id="@+id/artist_page_tagholder"
+                                            android:orientation="horizontal"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="match_parent">
+
+                                            <!-- Dynamicly added textviews -->
+
+                                        </LinearLayout>
+
+                                    </HorizontalScrollView>
+
+                                </LinearLayout>
+
+
+
+                            </android.support.v7.widget.CardView>
+
+                        </FrameLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="@dimen/cards_dimen"
+                            android:paddingLeft="@dimen/padding_land_app"
+                            android:paddingRight="@dimen/padding_land_app">
+
+                            <android.support.v7.widget.CardView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                card_view:cardElevation="2sp"
+                                card_view:cardUseCompatPadding="true">
+
+                                <LinearLayout
+                                    android:orientation="vertical"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content">
+
+                                    <TextView
+                                        android:text="@string/text_artist_info"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/background_floating_material_dark"
+                                        android:textSize="@dimen/all_info_text_size"
+                                        android:gravity="center"/>
+
+                                    <com.example.andrey.betterlastfm.AutoResizeTextView
+                                        android:id="@+id/artist_page_artist_info"
+                                        android:text="@string/lorem_ipsum"
+                                        android:textColor="@color/background_floating_material_dark"
+                                        android:textSize="@dimen/all_info_text_size"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:padding="@dimen/padding_lists"/>
+
+                                </LinearLayout>
+
+
+
+                            </android.support.v7.widget.CardView>
+
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:id="@+id/artist_page_trackholder"
+                            android:orientation="vertical"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                        <HorizontalScrollView
+                            android:id="@+id/artist_page_albumholder"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <!-- Dynamicly added album pattern -->
+
+                        </HorizontalScrollView>
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+        </com.github.ksoichiro.android.observablescrollview.ObservableScrollView>
+
+        <android.support.v7.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            android:paddingTop="24dp"
+            android:minHeight="?attr/actionBarSize"
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar" />
+
+        <ProgressBar
+            android:background="@color/background_floating_material_light"
+            android:id="@+id/artist_progress_bar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:visibility="gone"
+            android:indeterminateDrawable="@drawable/progress" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="left">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="178dp"
+            android:background="@drawable/header_background"
+            android:orientation="vertical"
+            android:weightSum="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="vertical"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true">
+
+                <TextView
+                    android:id="@+id/item_navigation_header_username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:textColor="#ffffff"
+                    android:text="se0ko"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/item_navigation_header_userinfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#ffffff"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="5dp"
+                    android:text="Андрэ, 21, UA"
+                    android:textSize="14sp"
+                    android:textStyle="normal"/>
+
+            </LinearLayout>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:src="@drawable/male"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="38dp"
+                android:id="@+id/circleView"/>
+
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/navigation_listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:background="#ffffff"
+            android:scrollbars="vertical">
+
+        </ListView>
+
+    </LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>
+
