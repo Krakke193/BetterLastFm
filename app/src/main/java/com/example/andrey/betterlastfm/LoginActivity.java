@@ -53,6 +53,8 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
         final EditText editTextPassword = (EditText) findViewById(R.id.userpassword_login_edit_text);
         Button loginButton = (Button) findViewById(R.id.login_button);
 
+        //getLoaderManager().initLoader(0, null, this);
+
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,15 +68,16 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
                 apiSignature = Util.md5(tmp);
 
-                sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("api_signature", apiSignature);
-                editor.putString("username", username);
-                editor.commit();
+
+                //SharedPreferences.Editor editor = sharedPreferences.edit();
+                //editor.putString("api_signature", apiSignature);
+                //editor.putString("username", username);
+                //editor.commit();
 
                 Log.d(LOG_TAG, apiSignature);
 
                 initLoader();
+
 
                 getLoaderManager().getLoader(0).forceLoad();
             }
@@ -82,7 +85,7 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
     }
 
     private void initLoader(){
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     @Override
@@ -92,10 +95,20 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
-        if (sharedPreferences.contains("username") && sharedPreferences.contains("api_signature")){
+
+        SharedPreferences mPref = getSharedPreferences(
+                "com.example.andrey.betterlastfm", Context.MODE_PRIVATE);
+
+        if (data.equals(Util.ERROR)) {
+            Toast.makeText(this, "Invalid username / password.", Toast.LENGTH_SHORT).show();
+            return;
+        } else if (mPref.contains("username")){
             Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, ProfileActivity.class));
         }
+
+        getLoaderManager().getLoader(0).reset();
+
     }
 
     @Override

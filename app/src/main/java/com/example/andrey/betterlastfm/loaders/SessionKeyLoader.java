@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.Util;
 
@@ -93,13 +94,19 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
 
             loginJsonStr = buffer.toString();
 
-            String sessionKey = parseSessionKeyFromJson(loginJsonStr);
-            Util.setSessionKey(mContext, sessionKey);
+            if (isErrorGetFromJson(loginJsonStr))
+                return Util.ERROR;
+            else {
+                String sessionKey = parseSessionKeyFromJson(loginJsonStr);
+                Util.setSessionKey(mContext, sessionKey);
 
-            String username = parseUsernameFromJson(loginJsonStr);
-            Util.setUsername(mContext, username);
+                String username = parseUsernameFromJson(loginJsonStr);
+                Util.setUsername(mContext, username);
 
-            return sessionKey;
+                return sessionKey;
+            }
+
+
 
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -112,13 +119,41 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
         return null;
     }
 
+    @Override
+    public void deliverResult(String data) {
+        super.deliverResult(data);
+    }
+
+    private boolean isErrorGetFromJson(String jsonStr){
+        try {
+            JSONObject rootJson = new JSONObject(jsonStr);
+
+            try {
+                String numberOfError = rootJson.getString("error");
+                String errMessg = rootJson.getString("message");
+                //errMessage = numberOfError + errMessg;
+                Log.d(LOG_TAG,"Error here");
+                return true;
+            } catch (JSONException e){
+                return false;
+            }
+
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+        return true;
+
+    }
+
     private String parseSessionKeyFromJson(String loginJsonStr) throws JSONException {
         try{
             JSONObject loginJson = new JSONObject(loginJsonStr);
+
             Log.d(LOG_TAG, "Login json str: " + loginJsonStr);
             JSONObject sessionJson = loginJson.getJSONObject("session");
 
             return sessionJson.getString("key");
+
         } catch (JSONException e){
             e.printStackTrace();
         }

@@ -49,6 +49,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
     private static final String LOG_TAG = ProfileLoader.class.getSimpleName();
 
     private String mUserName;
+    private String storedUsername;
     private Context mContext;
     private ProfileDbHelper dbHelper;
     private SQLiteDatabase mDbWrite;
@@ -66,6 +67,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
         dbHelper = new ProfileDbHelper(mContext);
         mDbWrite = dbHelper.getWritableDatabase();
         mShrdPrefs = mContext.getSharedPreferences("com.example.andrey.betterlastfm",Context.MODE_PRIVATE);
+        storedUsername = mShrdPrefs.getString(Util.USERNAME_KEY, Util.ERROR);
     }
 
     /**
@@ -110,7 +112,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
 
         //Database insertion!
 
-        if (mUserName.equals("se0ko")){
+        if (mUserName.equals(storedUsername)){
 
             mDbWrite.delete(
                     ProfileContract.HeaderEntry.TABLE_NAME,
@@ -192,7 +194,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
 
         //Database insertion!
 
-        if (mUserName.equals("se0ko")){
+        if (mUserName.equals(storedUsername)){
             ContentValues recentTrackValues = new ContentValues();
 
             mContext.getContentResolver()
@@ -261,7 +263,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
 
         //Database insertion!
 
-        if (mUserName.equals("se0ko")){
+        if (mUserName.equals(storedUsername)){
             mDbWrite.delete(
                     ProfileContract.TopArtistsEntry.TABLE_NAME,
                     null,

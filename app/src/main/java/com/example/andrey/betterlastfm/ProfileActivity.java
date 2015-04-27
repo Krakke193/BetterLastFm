@@ -479,6 +479,14 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             cursor.close();
         } else if (id == R.id.action_friends){
             startActivity(new Intent(this,FriendsActivity.class).putExtra("user", mUserName));
+        } else if (id == R.id.action_logout) {
+            SharedPreferences mPref = getSharedPreferences(
+                    "com.example.andrey.betterlastfm", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = mPref.edit();
+            editor.remove("username");
+            editor.remove("session_key");
+            editor.commit();
+            startActivity(new Intent(this, LoginActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
