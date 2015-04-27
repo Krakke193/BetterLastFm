@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
@@ -57,23 +58,27 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
 
         getLoaderManager().initLoader(0, null, this);
 
-        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                int iddqd = parent.getAdapter().getCount() - position;
+        SharedPreferences mShrdPrefs = getSharedPreferences("com.example.andrey.betterlastfm",MODE_PRIVATE);
+        String storedUserName = mShrdPrefs.getString("username", "ERROR");
 
-                Uri uri = ContentUris.withAppendedId(RecentTracksProvider.TRACKS_CONTENT_URI, iddqd);
-                int cnt = getContentResolver().delete(uri, "_id = " + Integer.toString(iddqd), null);
-                Toast.makeText(getApplicationContext(), "Deleted: " + cnt + "row, on " +
+        if (mUserName.equals(storedUserName))
+            mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    int iddqd = parent.getAdapter().getCount() - position;
+
+                    Uri uri = ContentUris.withAppendedId(RecentTracksProvider.TRACKS_CONTENT_URI, iddqd);
+                    int cnt = getContentResolver().delete(uri, "_id = " + Integer.toString(iddqd), null);
+                    Toast.makeText(getApplicationContext(), "Deleted: " + cnt + "row, on " +
                         Integer.toString(iddqd) + " id", Toast.LENGTH_SHORT).show();
 
-                mListAdapter.remove((RecentTrack) parent.getAdapter().getItem(position));
+                    mListAdapter.remove((RecentTrack) parent.getAdapter().getItem(position));
 
-                return true;
-            }
-        });
+                    return true;
+                }
+            });
 
-        if (mUserName.equals("se0ko")){
+        if (mUserName.equals(storedUserName)){
             Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
                     null,
                     null,
@@ -105,8 +110,7 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
             cursor.close();
 
         } else {
-            RecentTracksLoader rtl = new RecentTracksLoader(this, mListAdapter, ProfileActivity.mUserName);
-            rtl.forceLoad();
+            getLoaderManager().getLoader(0).forceLoad();
         }
 
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
