@@ -202,7 +202,7 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
         Log.d(LOG_TAG, "method" + method);
 
         try{
-            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
             HttpResponse response = httpclient.execute(httpPost);
 
             InputStream inputStream = response.getEntity().getContent();

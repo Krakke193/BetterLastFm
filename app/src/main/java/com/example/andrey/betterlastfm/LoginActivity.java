@@ -9,15 +9,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.loaders.SessionKeyLoader;
-
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by Andrey on 09.04.2015.
@@ -31,6 +28,11 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
     private String apiSignature;
 
     private SharedPreferences sharedPreferences;
+
+    private EditText mEditTextUserName;
+    private EditText mEditTextPassword;
+    private TextView mLogin;
+    private ProgressBar mProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,17 +51,20 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
         Log.d(LOG_TAG,sharedPreferences.getString("username", "ERROR NO USERNAME"));
         Log.d(LOG_TAG,sharedPreferences.getString("session_key", "ERROR NO SESSION KEY"));
 
-        final EditText editTextUsername = (EditText) findViewById(R.id.username_login_edit_text);
-        final EditText editTextPassword = (EditText) findViewById(R.id.userpassword_login_edit_text);
-        Button loginButton = (Button) findViewById(R.id.login_button);
+        mProgress = (ProgressBar) findViewById(R.id.view_progress);
+        mEditTextUserName = (EditText) findViewById(R.id.username_login_edit_text);
+        mEditTextPassword = (EditText) findViewById(R.id.userpassword_login_edit_text);
+        mLogin = (TextView) findViewById(R.id.login_button);
 
         //getLoaderManager().initLoader(0, null, this);
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                username = editTextUsername.getText().toString();
-                password = editTextPassword.getText().toString();
+                changeUiState(true);
+
+                username = mEditTextUserName.getText().toString();
+                password = mEditTextPassword.getText().toString();
                 apiKey = "f445e682840e750fc7c992898e868efb";
                 String secret = "5b332291ad05138bd2e441a22262e5b2";
                 String method = "auth.getMobileSession";
@@ -68,16 +73,9 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
                 apiSignature = Util.md5(tmp);
 
-
-                //SharedPreferences.Editor editor = sharedPreferences.edit();
-                //editor.putString("api_signature", apiSignature);
-                //editor.putString("username", username);
-                //editor.commit();
-
                 Log.d(LOG_TAG, apiSignature);
 
                 initLoader();
-
 
                 getLoaderManager().getLoader(0).forceLoad();
             }
@@ -100,6 +98,7 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
                 "com.example.andrey.betterlastfm", Context.MODE_PRIVATE);
 
         if (data.equals(Util.ERROR)) {
+
             Toast.makeText(this, "Invalid username / password.", Toast.LENGTH_SHORT).show();
             return;
         } else if (mPref.contains("username")){
@@ -107,12 +106,23 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
             startActivity(new Intent(this, ProfileActivity.class));
         }
 
+        changeUiState(false);
+
         getLoaderManager().getLoader(0).reset();
 
     }
 
     @Override
     public void onLoaderReset(Loader<String> loader) {
+
+    }
+
+    private void changeUiState(boolean state){
+        mLogin.setEnabled(!state);
+        if (state)
+            mProgress.setVisibility(View.VISIBLE);
+        else
+            mProgress.setVisibility(View.GONE);
 
     }
 }

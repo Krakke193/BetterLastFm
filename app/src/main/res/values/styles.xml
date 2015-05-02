@@ -5,8 +5,16 @@
 
     </style>
 
-    <style name="AppTheme.Translucent.Bar" parent="Theme.AppCompat.Light.NoActionBar">
+    <style
+        name="AppTheme.Translucent.Bar"
+        parent="Theme.AppCompat.Light.NoActionBar" />
 
+    <style name="SigninButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.Large</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
 </resources>

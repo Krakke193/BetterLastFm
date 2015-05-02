@@ -175,6 +175,9 @@ public class ArtistActivity extends ActionBarActivity
         getLoaderManager().getLoader(0).stopLoading();
     }
 
+    /**
+     * TODO: This method might be the cause of not re-creating scroll state.
+     */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
