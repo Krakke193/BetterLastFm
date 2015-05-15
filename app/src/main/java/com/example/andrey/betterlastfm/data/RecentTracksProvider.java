@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.andrey.betterlastfm.model.RecentTrack;
+
 import org.w3c.dom.Text;
 
 /**
@@ -134,9 +136,25 @@ public class RecentTracksProvider extends ContentProvider {
             Log.d(LOG_TAG, uri.toString());
         }
 
-        int cnt = db.delete(ProfileContract.RecentTracksEntry.TABLE_NAME, selection, null);
-        getContext().getContentResolver().notifyChange(uri, null);
-        return cnt;
+        Cursor cursor = db.query(
+                ProfileContract.RecentTracksEntry.TABLE_NAME,
+                null,
+                selection,
+                null,
+                null,
+                null,
+                null);
+
+        if (cursor.moveToFirst())
+            if (cursor.getString(cursor.getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG)).equals("1")){
+                int cnt = db.delete(ProfileContract.RecentTracksEntry.TABLE_NAME, selection, null);
+                getContext().getContentResolver().notifyChange(uri, null);
+                return cnt;
+            } else {
+                return 0;
+            }
+        return 0;
+
     }
 
     @Override

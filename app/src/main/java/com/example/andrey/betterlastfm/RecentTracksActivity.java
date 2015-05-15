@@ -69,10 +69,26 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
 
                     Uri uri = ContentUris.withAppendedId(RecentTracksProvider.TRACKS_CONTENT_URI, iddqd);
                     int cnt = getContentResolver().delete(uri, "_id = " + Integer.toString(iddqd), null);
-                    Toast.makeText(getApplicationContext(), "Deleted: " + cnt + "row, on " +
-                        Integer.toString(iddqd) + " id", Toast.LENGTH_SHORT).show();
 
-                    mListAdapter.remove((RecentTrack) parent.getAdapter().getItem(position));
+                    if (cnt == 0)
+                        Toast.makeText(
+                                getApplicationContext(),
+                                "Cannot delete this track",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                    else {
+                        Toast.makeText(
+                                getApplicationContext(),
+                                "Deleted: " +
+                                        cnt +
+                                        "row, on " +
+                                        Integer.toString(iddqd) +
+                                        " id",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                        mListAdapter.remove((RecentTrack) parent.getAdapter().getItem(position));
+                    }
+
 
                     return true;
                 }
@@ -174,6 +190,9 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
                         Util.API_KEY,
                         recentTracks);
                 scrobbleLoader.forceLoad();
+
+                //Util.updateAfterScrobble(this, mListAdapter);
+
             } else {
                 Toast.makeText(this, "Nothing to scrobble!", Toast.LENGTH_SHORT).show();
             }
@@ -201,8 +220,8 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
         mListAdapter.clear();
 
         Log.d(LOG_TAG, Integer.toString(data.size()));
-        for(int i=0; i<10; i++) {
-            mListAdapter.add(data.get(i));
+        for(RecentTrack recentTrack : data) {
+            mListAdapter.add(recentTrack);
         }
 
         bar.setVisibility(View.GONE);

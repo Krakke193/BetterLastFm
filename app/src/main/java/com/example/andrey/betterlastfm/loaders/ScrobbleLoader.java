@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.andrey.betterlastfm.R;
 import com.example.andrey.betterlastfm.Util;
 import com.example.andrey.betterlastfm.data.ProfileContract;
 import com.example.andrey.betterlastfm.data.RecentTracksProvider;
@@ -265,9 +266,15 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
             contentValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
             int cnt = mContext
                     .getContentResolver()
-                    .update(RecentTracksProvider.TRACKS_CONTENT_URI, contentValues, null, null);
+                    .update(
+                            RecentTracksProvider.TRACKS_CONTENT_URI, contentValues, null, null
+                    );
 
             Log.d(LOG_TAG, "Scrobble status removed from " + Integer.toString(cnt) + " rows");
+
+
+//            if (mContext.getClass().toString().equals(mContext.getString(R.string.profile_activity_class_string)))
+//                Util.updateAfterScrobble(mContext, null);
         }
     }
 }

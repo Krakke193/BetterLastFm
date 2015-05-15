@@ -1,14 +1,21 @@
 package com.example.andrey.betterlastfm;
 
+import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+
+import com.example.andrey.betterlastfm.loaders.ProfileLoader;
+import com.example.andrey.betterlastfm.loaders.RecentTracksLoader;
+import com.example.andrey.betterlastfm.model.RecentTrack;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -82,4 +89,31 @@ public class Util {
 
     }
 
+    public static void updateAfterScrobble(Context context, ArrayAdapter<RecentTrack> arrayAdapter){
+
+        String callingActivity = context.getClass().toString();
+        String savedUserName = context
+                .getSharedPreferences(
+                        "com.example.andrey.betterlastfm",
+                        Context.MODE_PRIVATE)
+                .getString(USERNAME_KEY, ERROR);
+
+        if (callingActivity
+                .equals(context.getResources()
+                        .getString(R.string.profile_activity_class_string))
+                ){
+
+            ProfileLoader profileLoader = new ProfileLoader(context, savedUserName);
+            profileLoader.forceLoad();
+
+        } else if (callingActivity
+                .equals(context
+                        .getResources()
+                        .getString(R.string.recent_tracks_activity_class_string))
+                ){
+
+            RecentTracksLoader recentTracksLoader = new RecentTracksLoader(context, arrayAdapter, savedUserName);
+            recentTracksLoader.forceLoad();
+        }
+    }
 }

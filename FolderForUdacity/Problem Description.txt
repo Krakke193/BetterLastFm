@@ -1,0 +1,1 @@
+The app is unofficial "last.fm" client. It has a site-viewing base functionality and can perform a scrobbling operation. There is no such app in the Play Market (which can perform scrobbling along with viewing different parts of the site).

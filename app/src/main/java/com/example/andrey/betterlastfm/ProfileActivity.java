@@ -3,6 +3,7 @@ package com.example.andrey.betterlastfm;
 import android.app.ActivityOptions;
 import android.app.LoaderManager;
 import android.app.ProgressDialog;
+import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -466,12 +467,12 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                     ));
                 } while (cursor.moveToNext());
 
-                ScrobbleLoader scrobbleLoader = new ScrobbleLoader(this,
+                ScrobbleLoader scrobbleLoader = new ScrobbleLoader(
+                        this,
                         Util.API_KEY,
                         profileRecentTracks);
 
                 scrobbleLoader.forceLoad();
-
             } else {
                 Toast.makeText(this, "Nothing to scrobble!", Toast.LENGTH_SHORT).show();
             }
