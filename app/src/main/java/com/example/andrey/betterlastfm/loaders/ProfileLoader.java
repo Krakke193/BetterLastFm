@@ -197,8 +197,8 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
         if (mUserName.equals(storedUsername)){
             ContentValues recentTrackValues = new ContentValues();
 
-            mContext.getContentResolver()
-                    .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null);
+            Log.d(LOG_TAG, "Deleted: " + Integer.toString(mContext.getContentResolver()
+                    .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null)) + " rows");
 
             Log.d(LOG_TAG, Integer.toString(profileRecentTracks.size()));
 

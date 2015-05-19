@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -21,6 +22,7 @@ import com.example.andrey.betterlastfm.loaders.SessionKeyLoader;
  */
 public class LoginActivity extends Activity implements LoaderManager.LoaderCallbacks<String>{
     private final String LOG_TAG = LoginActivity.class.getSimpleName();
+    private static final String UiStateKey = "UiStateKey";
 
     private String username;
     private String password;
@@ -56,7 +58,12 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
         mEditTextPassword = (EditText) findViewById(R.id.userpassword_login_edit_text);
         mLogin = (TextView) findViewById(R.id.login_button);
 
-        //getLoaderManager().initLoader(0, null, this);
+        if (sharedPreferences.contains(Util.USERNAME_KEY) &&
+                sharedPreferences.contains(Util.USER_PASSWORD_KEY)) {
+
+            mEditTextUserName.setText(sharedPreferences.getString(Util.USERNAME_KEY, Util.ERROR));
+            mEditTextPassword.setText(sharedPreferences.getString(Util.USER_PASSWORD_KEY, Util.ERROR));
+        }
 
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,15 +105,13 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
                 "com.example.andrey.betterlastfm", Context.MODE_PRIVATE);
 
         if (data.equals(Util.ERROR)) {
-
             Toast.makeText(this, "Invalid username / password.", Toast.LENGTH_SHORT).show();
+            changeUiState(false);
             return;
         } else if (mPref.contains("username")){
             Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, ProfileActivity.class));
         }
-
-        changeUiState(false);
 
         getLoaderManager().getLoader(0).reset();
 
@@ -117,12 +122,47 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
     }
 
-    private void changeUiState(boolean state){
-        mLogin.setEnabled(!state);
-        if (state)
-            mProgress.setVisibility(View.VISIBLE);
-        else
-            mProgress.setVisibility(View.GONE);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(Util.USERNAME_KEY, mEditTextUserName.getText().toString());
+        outState.putString(Util.USER_PASSWORD_KEY, mEditTextPassword.getText().toString());
 
+        outState.putBoolean(UiStateKey, mLogin.isEnabled());
+
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mEditTextUserName.setText(savedInstanceState.getString(Util.USERNAME_KEY));
+        mEditTextPassword.setText(savedInstanceState.getString(Util.USER_PASSWORD_KEY));
+
+        mLogin.setEnabled(savedInstanceState.getBoolean(UiStateKey));
+        if (savedInstanceState.getBoolean(UiStateKey))
+            mProgress.setVisibility(View.GONE);
+        else
+            mProgress.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(Util.USERNAME_KEY, mEditTextUserName.getText().toString());
+        editor.putString(Util.USER_PASSWORD_KEY, mEditTextPassword.getText().toString());
+        editor.apply();
+    }
+
+    private void changeUiState(boolean state){
+        if (state) {
+            mLogin.setEnabled(false);
+            mProgress.setVisibility(View.VISIBLE);
+        } else {
+            mLogin.setEnabled(true);
+            mProgress.setVisibility(View.GONE);
+        }
     }
 }

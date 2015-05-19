@@ -42,6 +42,7 @@ public class Util {
     public static final String ARTIST_KEY = "artist";
     public static final String PREF_SCROBBLE_KEY = "pref_scrobble_key";
     public static final String USERNAME_KEY = "username";
+    public static final String USER_PASSWORD_KEY = "user_password";
 
 
     public static String md5(String s) {

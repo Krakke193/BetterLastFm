@@ -114,9 +114,13 @@ public class RecentTracksProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        db = mProfileDbHelper.getWritableDatabase();
+
         switch (uriMatcher.match(uri)) {
             case URI_TRACKS:
-                break;
+
+                return db.delete(ProfileContract.RecentTracksEntry.TABLE_NAME, null, null);
+
             case URI_TRACKS_ID:
                 String id = uri.getLastPathSegment();
                 if (TextUtils.isEmpty(selection)) {
@@ -129,7 +133,6 @@ public class RecentTracksProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Wrong URI: " + uri);
         }
-        db = mProfileDbHelper.getWritableDatabase();
 
         if (!TextUtils.isEmpty(selection)){
             Log.d(LOG_TAG, selection);

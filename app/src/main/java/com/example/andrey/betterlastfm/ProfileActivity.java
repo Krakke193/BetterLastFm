@@ -487,7 +487,13 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             editor.remove("username");
             editor.remove("session_key");
             editor.commit();
-            startActivity(new Intent(this, LoginActivity.class));
+
+            db.delete(ProfileContract.HeaderEntry.TABLE_NAME, null, null);
+            db.delete(ProfileContract.ProfileEntry.TABLE_NAME, null, null);
+            db.delete(ProfileContract.TopArtistsEntry.TABLE_NAME, null, null);
+            db.delete(ProfileContract.RecentTracksEntry.TABLE_NAME, null, null);
+
+            startActivity(new Intent(this, LoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -522,88 +528,95 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         );
 
         ProfileActivity.tracksListLinearLayout.removeAllViews();
-
-        for(int i=0; i<5; i++) {
-            View recentTrackView = LayoutInflater.from(this).inflate(R.layout.item_recent_tracks_list, null);
-            ((TextView) recentTrackView.findViewById(R.id.list_textview))
-                    .setText(profileRecentTracks.get(i).getTrackArtist() +
-                            " - " +
-                            profileRecentTracks.get(i).getTrackName());
-
-            ((TextView) recentTrackView.findViewById(R.id.recent_tracks_list_date))
-                    .setText(profileRecentTracks.get(i).getTrackDate());
-
-
-            ImageView imageView = (ImageView) recentTrackView.findViewById(R.id.list_imageview);
-
-            if (!TextUtils.isEmpty(profileRecentTracks.get(i).getTrackImageURL()))
-                Picasso.with(this).load(profileRecentTracks.get(i).getTrackImageURL()).into(imageView);
-
-            ProfileActivity.tracksListLinearLayout.addView(recentTrackView);
-
-            ImageView divider1 = new ImageView(this);
-            LinearLayout.LayoutParams lp1 =
-                    new LinearLayout.LayoutParams(RadioGroup.LayoutParams.MATCH_PARENT, 1);
-            lp1.setMargins(5, 0, 5, 0);
-            divider1.setLayoutParams(lp1);
-            divider1.setBackgroundColor(Color.rgb(200, 200, 200));
-            ProfileActivity.tracksListLinearLayout.addView(divider1);
-        }
-
         ProfileActivity.artistsListLinearLayout.removeAllViews();
 
-        int fullPlays = Integer.parseInt(profileTopArtists.get(0).getArtistPlays().replaceAll("plays", ""));
-        int currentFullWidth = mShrdPrefs.getInt("full_width", 50);
+        if (profileRecentTracks.size() != 0 && profileTopArtists.size() != 0) {
 
-        for (int i=0; i<profileTopArtists.size(); i++){
-            View view = LayoutInflater.from(this).inflate(R.layout.item_artists_list, null);
+            for(int i=0; i<5; i++) {
+                View recentTrackView = LayoutInflater.from(this).inflate(R.layout.item_recent_tracks_list, null);
+                ((TextView) recentTrackView.findViewById(R.id.list_textview))
+                        .setText(profileRecentTracks.get(i).getTrackArtist() +
+                                " - " +
+                                profileRecentTracks.get(i).getTrackName());
 
-            //final ImageView
+                ((TextView) recentTrackView.findViewById(R.id.recent_tracks_list_date))
+                        .setText(profileRecentTracks.get(i).getTrackDate());
 
-            final ImageView imageView = (ImageView) view.findViewById(R.id.artists_list_imageview);
 
-            TextView tempTextView = (TextView) view.findViewById(R.id.artists_list_name_textview);
+                ImageView imageView = (ImageView) recentTrackView.findViewById(R.id.list_imageview);
 
-            tempTextView.setText(profileTopArtists.get(i).getArtistName());
+                if (!TextUtils.isEmpty(profileRecentTracks.get(i).getTrackImageURL()))
+                    Picasso.with(this).load(profileRecentTracks.get(i).getTrackImageURL()).into(imageView);
 
-            ((TextView) view.findViewById(R.id.artists_list_plays_textview))
-                    .setText(profileTopArtists.get(i).getArtistPlays());
+                ProfileActivity.tracksListLinearLayout.addView(recentTrackView);
 
-            float percentage = (Integer
-                    .parseInt(profileTopArtists.get(i)
-                            .getArtistPlays()
-                            .replaceAll("plays","")) * 100 / fullPlays
-            );
+                ImageView divider1 = new ImageView(this);
+                LinearLayout.LayoutParams lp1 =
+                        new LinearLayout.LayoutParams(RadioGroup.LayoutParams.MATCH_PARENT, 1);
+                lp1.setMargins(5, 0, 5, 0);
+                divider1.setLayoutParams(lp1);
+                divider1.setBackgroundColor(Color.rgb(200, 200, 200));
+                ProfileActivity.tracksListLinearLayout.addView(divider1);
+            }
 
-            ImageView relativeBar = (ImageView) view.findViewById(R.id.artists_relativebar_imageview);
 
-            ViewGroup.LayoutParams params = relativeBar.getLayoutParams();
-            params.width = (int) ((currentFullWidth * percentage) / 100);
-            relativeBar.setLayoutParams(params);
 
-            if (!TextUtils.isEmpty(profileTopArtists.get(i).getArtistPicURL()))
-                Picasso.with(this).load(profileTopArtists.get(i).getArtistPicURL()).into(imageView);
+            int fullPlays = Integer.parseInt(profileTopArtists.get(0).getArtistPlays().replaceAll("plays", ""));
+            int currentFullWidth = mShrdPrefs.getInt("full_width", 50);
 
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    TextView temp = (TextView) v.findViewById(R.id.artists_list_name_textview);
-                    Intent intent = new Intent(getApplicationContext(), ArtistActivity.class)
-                                    .putExtra(Util.ARTIST_KEY, temp.getText());
+            for (int i=0; i<profileTopArtists.size(); i++){
+                View view = LayoutInflater.from(this).inflate(R.layout.item_artists_list, null);
 
-                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                        imageView.setTransitionName("artistPic");
-                        ActivityOptions options = ActivityOptions
-                                .makeSceneTransitionAnimation(ProfileActivity.this, imageView, "artistPic");
+                //final ImageView
 
-                        startActivity(intent, options.toBundle());
-                    } else{
-                        startActivity(intent);
+                final ImageView imageView = (ImageView) view.findViewById(R.id.artists_list_imageview);
+
+                TextView tempTextView = (TextView) view.findViewById(R.id.artists_list_name_textview);
+
+                tempTextView.setText(profileTopArtists.get(i).getArtistName());
+
+                ((TextView) view.findViewById(R.id.artists_list_plays_textview))
+                        .setText(profileTopArtists.get(i).getArtistPlays());
+
+                float percentage = (Integer
+                        .parseInt(profileTopArtists.get(i)
+                                .getArtistPlays()
+                                .replaceAll("plays","")) * 100 / fullPlays
+                );
+
+                ImageView relativeBar = (ImageView) view.findViewById(R.id.artists_relativebar_imageview);
+
+                ViewGroup.LayoutParams params = relativeBar.getLayoutParams();
+                params.width = (int) ((currentFullWidth * percentage) / 100);
+                relativeBar.setLayoutParams(params);
+
+                if (!TextUtils.isEmpty(profileTopArtists.get(i).getArtistPicURL()))
+                    Picasso.with(this).load(profileTopArtists.get(i).getArtistPicURL()).into(imageView);
+
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TextView temp = (TextView) v.findViewById(R.id.artists_list_name_textview);
+                        Intent intent = new Intent(getApplicationContext(), ArtistActivity.class)
+                                .putExtra(Util.ARTIST_KEY, temp.getText());
+
+                        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            imageView.setTransitionName("artistPic");
+                            ActivityOptions options = ActivityOptions
+                                    .makeSceneTransitionAnimation(ProfileActivity.this, imageView, "artistPic");
+
+                            startActivity(intent, options.toBundle());
+                        } else {
+                            startActivity(intent);
+                        }
+
                     }
+                });
+                ProfileActivity.artistsListLinearLayout.addView(view);
+            }
 
-                }
-            });
-            ProfileActivity.artistsListLinearLayout.addView(view);
+        } else {
+            Toast.makeText(this, "Scrobble some music! :)", Toast.LENGTH_SHORT).show();
         }
 
         getLoaderManager().getLoader(0).reset();
