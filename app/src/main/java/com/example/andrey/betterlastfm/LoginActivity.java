@@ -72,6 +72,27 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
                 username = mEditTextUserName.getText().toString();
                 password = mEditTextPassword.getText().toString();
+
+                if (username.equals("") && password.equals("")){
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.please_username_and_password),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    changeUiState(false);
+                } else if (username.equals("") && !password.equals("")) {
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.please_username),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    changeUiState(false);
+                } else if (password.equals("") && !username.equals("")) {
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.please_password),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    changeUiState(false);
+                }
+
                 apiKey = "f445e682840e750fc7c992898e868efb";
                 String secret = "5b332291ad05138bd2e441a22262e5b2";
                 String method = "auth.getMobileSession";
@@ -83,7 +104,6 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
                 Log.d(LOG_TAG, apiSignature);
 
                 initLoader();
-
                 getLoaderManager().getLoader(0).forceLoad();
             }
         });
@@ -100,12 +120,15 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
-
         SharedPreferences mPref = getSharedPreferences(
                 "com.example.andrey.betterlastfm", Context.MODE_PRIVATE);
 
         if (data.equals(Util.ERROR)) {
             Toast.makeText(this, "Invalid username / password.", Toast.LENGTH_SHORT).show();
+            changeUiState(false);
+            return;
+        } else if (data.equals(Util.ERROR_NO_INTERNET)){
+            Toast.makeText(this, getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
             changeUiState(false);
             return;
         } else if (mPref.contains("username")){
@@ -114,7 +137,6 @@ public class LoginActivity extends Activity implements LoaderManager.LoaderCallb
         }
 
         getLoaderManager().getLoader(0).reset();
-
     }
 
     @Override

@@ -12,11 +12,13 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.loaders.ProfileLoader;
 import com.example.andrey.betterlastfm.loaders.RecentTracksLoader;
 import com.example.andrey.betterlastfm.model.RecentTrack;
 
+import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -29,6 +31,7 @@ public class Util {
     public static final String SECRET = "5b332291ad05138bd2e441a22262e5b2";
     public static final String API_KEY = "f445e682840e750fc7c992898e868efb";
     public static final String ERROR = "Error";
+    public static final String ERROR_NO_INTERNET = "no_connection";
 
     public static final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
     public static final String METHOD_TEXT = "method";
@@ -43,7 +46,6 @@ public class Util {
     public static final String PREF_SCROBBLE_KEY = "pref_scrobble_key";
     public static final String USERNAME_KEY = "username";
     public static final String USER_PASSWORD_KEY = "user_password";
-
 
     public static String md5(String s) {
         final String MD5 = "MD5";
@@ -76,8 +78,6 @@ public class Util {
         SharedPreferences.Editor editor = mPref.edit();
         editor.putString("session_key", sessionKey);
         editor.commit();
-        Log.d(LOG_TAG, "Session key: " + mPref.getString("session_key", "Error setting session key"));
-
     }
 
     public static void setUsername(Context context, String username){
@@ -90,31 +90,16 @@ public class Util {
 
     }
 
-    public static void updateAfterScrobble(Context context, ArrayAdapter<RecentTrack> arrayAdapter){
+    public static boolean isInternetAvailable(){
+        try {
+            InetAddress ipAddr = InetAddress.getByName("google.com"); //You can replace it with your name
 
-        String callingActivity = context.getClass().toString();
-        String savedUserName = context
-                .getSharedPreferences(
-                        "com.example.andrey.betterlastfm",
-                        Context.MODE_PRIVATE)
-                .getString(USERNAME_KEY, ERROR);
-
-        if (callingActivity
-                .equals(context.getResources()
-                        .getString(R.string.profile_activity_class_string))
-                ){
-
-            ProfileLoader profileLoader = new ProfileLoader(context, savedUserName);
-            profileLoader.forceLoad();
-
-        } else if (callingActivity
-                .equals(context
-                        .getResources()
-                        .getString(R.string.recent_tracks_activity_class_string))
-                ){
-
-            RecentTracksLoader recentTracksLoader = new RecentTracksLoader(context, arrayAdapter, savedUserName);
-            recentTracksLoader.forceLoad();
+            if (ipAddr.toString().equals(""))
+                return false;
+            else
+                return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

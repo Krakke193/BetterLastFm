@@ -87,6 +87,8 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
         ArrayList<String> profileHeaderArray = new ArrayList<>();
 
         try {
+            if (profileJsonStr.equals(""))
+                return null;
             JSONObject profileJson = new JSONObject(profileJsonStr);
             JSONObject userJson = profileJson.getJSONObject("user");
             JSONObject dateJson = userJson.getJSONObject(REGISTRATION_DATE);
@@ -106,8 +108,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             profileHeaderArray.add(userJson.getString(PLAYCOUNT));
             profileHeaderArray.add(dateJson.getString("#text"));
         } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
+            return null;
         }
 
         //Database insertion!
@@ -153,6 +154,8 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
         ArrayList<RecentTrack> profileRecentTracks = new ArrayList<>();
 
         try {
+            if (tracksJsonStr.equals(""))
+                return null;
             JSONObject tracksJson = new JSONObject(tracksJsonStr);
             JSONObject recentTracksJson = tracksJson.getJSONObject("recenttracks");
             JSONArray recentTracksArr = recentTracksJson.getJSONArray("track");
@@ -188,19 +191,13 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
                 ));
             }
         } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
+            return null;
         }
 
         //Database insertion!
 
         if (mUserName.equals(storedUsername)){
             ContentValues recentTrackValues = new ContentValues();
-
-            Log.d(LOG_TAG, "Deleted: " + Integer.toString(mContext.getContentResolver()
-                    .delete(RecentTracksProvider.TRACKS_CONTENT_URI, null, null)) + " rows");
-
-            Log.d(LOG_TAG, Integer.toString(profileRecentTracks.size()));
 
             for (int i = profileRecentTracks.size()-1; i >= 0; i--){
 
@@ -236,6 +233,8 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
 
         ArrayList<TopArtist> profileTopArtists = new ArrayList<>();
         try {
+            if (topArtistsJsonStr.equals(""))
+                return null;
             JSONObject tracksJson = new JSONObject(topArtistsJsonStr);
             JSONObject topArtistsJson = tracksJson.getJSONObject("topartists");
             JSONArray topArtistsArr = topArtistsJson.getJSONArray("artist");
@@ -257,8 +256,7 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
                 ));
             }
         } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
+            return null;
         }
 
         //Database insertion!
@@ -320,6 +318,10 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
         //Getting header info!
 
         try {
+            if (!Util.isInternetAvailable()){
+                return null;
+            }
+
             final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
             final String METHOD_TYPE = "method";
             final String USER = "user";
@@ -333,8 +335,6 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
                     .appendQueryParameter(FORMAT, format)
                     .build();
             URL url = new URL(builtUri.toString());
-
-            Log.d(LOG_TAG, url.toString());
 
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
@@ -359,12 +359,10 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             mProfileHeaderArray = getProfileInfoFromJson(profileJsonStr);
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
             return null;
 
         } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
-            e.printStackTrace();
+            return null;
 
         } finally {
             if (urlConnection != null)
@@ -381,6 +379,9 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
         //Getting recent tracks!
 
         try {
+            if (!Util.isInternetAvailable()){
+                return null;
+            }
             final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
             final String METHOD_TYPE = "method";
             final String USER = "user";
@@ -419,12 +420,10 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             mProfileRecentTracks = getRecentTracksFromJson(profileRecentTracksJsonStr);
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
             return null;
 
         } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
-            e.printStackTrace();
+            return null;
 
         } finally {
             if (urlConnection != null)
@@ -441,6 +440,9 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
         // Getting top artists!
 
         try {
+            if (!Util.isInternetAvailable()){
+                return null;
+            }
             final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
             final String METHOD_TYPE = "method";
             final String USER = "user";
@@ -481,12 +483,10 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             mProfileTopArtists = getTopArtistsFromJson(profileTopArtistsJsonStr);
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
             return null;
 
         } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
-            e.printStackTrace();
+            return null;
 
         } finally {
             if (urlConnection != null)
@@ -500,14 +500,11 @@ public class ProfileLoader extends AsyncTaskLoader<Profile> {
             }
         }
 
-        Profile profile = new Profile(mProfileHeaderArray, mProfileRecentTracks, mProfileTopArtists);
-        Log.d(LOG_TAG, "Finished loading in background");
-        return profile;
+        return new Profile(mProfileHeaderArray, mProfileRecentTracks, mProfileTopArtists);
     }
 
     @Override
     public void deliverResult(Profile data) {
         super.deliverResult(data);
-        Log.d(LOG_TAG, "Result delivered?");
     }
 }

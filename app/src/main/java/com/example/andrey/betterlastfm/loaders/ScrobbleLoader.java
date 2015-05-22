@@ -48,6 +48,7 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
     private ArrayList<RecentTrack> mProfileRecentTracks = new ArrayList<>();
 
     private boolean errFlag = false;
+    private boolean mErrInternet = false;
     private int scrobbledTracksCount = 0;
     private String errMessage;
     private String tmpArtistsForMD5;
@@ -65,6 +66,10 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
 
     @Override
     public Void loadInBackground() {
+        if (!Util.isInternetAvailable()){
+            mErrInternet = true;
+            return null;
+        }
         if (mProfileRecentTracks.size() > 10){
             ArrayList<RecentTrack> listRecentTracks = new ArrayList<>();
             for (int i=0; i<mProfileRecentTracks.size(); i++){
@@ -81,6 +86,33 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
             performScrobble(null);
 
         return null;
+    }
+
+    @Override
+    public void deliverResult(Void data) {
+        super.deliverResult(data);
+
+        if (errFlag) {
+            Toast.makeText(mContext, errMessage, Toast.LENGTH_SHORT).show();
+        } else if (mErrInternet){
+            Toast.makeText(
+                    mContext,
+                    mContext.getString(R.string.error_no_internet),
+                    Toast.LENGTH_SHORT)
+                    .show();
+        } else {
+            Toast.makeText(mContext,
+                    "Succesfully scrobbled " + Integer.toString(scrobbledTracksCount) + "tracks",
+                    Toast.LENGTH_SHORT)
+                    .show();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
+            int cnt = mContext
+                    .getContentResolver()
+                    .update(
+                            RecentTracksProvider.TRACKS_CONTENT_URI, contentValues, null, null
+                    );
+        }
     }
 
     private void performScrobble(ArrayList<RecentTrack> limitedRecentTracks){
@@ -150,11 +182,8 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
         tmpTimestampsForMD5 = "";
 
         String apiSignature = Util.md5(tmpStringForMD5);
-        Log.d(LOG_TAG, "String for md5: " + tmpStringForMD5);
-        Log.d(LOG_TAG, "Api signature: " + apiSignature);
 
         if (sessionKey.equals("ERROR")){
-            Log.d(LOG_TAG, "Error in username: something wrong!");
             return;
         }
 
@@ -194,13 +223,9 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
         }
 
         nameValuePairs.add(new BasicNameValuePair("api_key", mApiKey));
-        Log.d(LOG_TAG, "api_key" + mApiKey);
         nameValuePairs.add(new BasicNameValuePair("api_sig", apiSignature));
-        Log.d(LOG_TAG, "api_sig" + apiSignature);
         nameValuePairs.add(new BasicNameValuePair("sk", sessionKey));
-        Log.d(LOG_TAG, "sk" + sessionKey);
         nameValuePairs.add(new BasicNameValuePair("method", method));
-        Log.d(LOG_TAG, "method" + method);
 
         try{
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
@@ -248,33 +273,5 @@ public class ScrobbleLoader extends AsyncTaskLoader<Void> {
             e.printStackTrace();
         }
         return true;
-
-    }
-
-    @Override
-    public void deliverResult(Void data) {
-        super.deliverResult(data);
-
-        if (errFlag) {
-            Toast.makeText(mContext, errMessage, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(mContext,
-                    "Succesfully scrobbled " + Integer.toString(scrobbledTracksCount) + "tracks",
-                    Toast.LENGTH_SHORT)
-                    .show();
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(ProfileContract.RecentTracksEntry.COLUMN_SCROBBLEABLE_FLAG, 0);
-            int cnt = mContext
-                    .getContentResolver()
-                    .update(
-                            RecentTracksProvider.TRACKS_CONTENT_URI, contentValues, null, null
-                    );
-
-            Log.d(LOG_TAG, "Scrobble status removed from " + Integer.toString(cnt) + " rows");
-
-
-//            if (mContext.getClass().toString().equals(mContext.getString(R.string.profile_activity_class_string)))
-//                Util.updateAfterScrobble(mContext, null);
-        }
     }
 }

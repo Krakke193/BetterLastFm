@@ -48,7 +48,6 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
         if (mUserName.equals(null))
             Toast.makeText(this,"Ooops! something went wrong!", Toast.LENGTH_SHORT).show();
 
-
         ListView mListView = (ListView) this.findViewById(R.id.list_recent_tracks);
         mListView.setScrollContainer(false);
         mListAdapter = new TracksAdapter(this,R.layout.item_recent_tracks_list);
@@ -88,8 +87,6 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
                                 .show();
                         mListAdapter.remove((RecentTrack) parent.getAdapter().getItem(position));
                     }
-
-
                     return true;
                 }
             });
@@ -150,12 +147,10 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
                 bar.setVisibility(View.VISIBLE);
                 getLoaderManager().getLoader(0).forceLoad();
             } catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
 
         } else if (id == R.id.action_scrobble_recent_tracks) {
-
             ArrayList<RecentTrack> recentTracks = new ArrayList<>();
 
             Cursor cursor = getContentResolver().query(RecentTracksProvider.TRACKS_CONTENT_URI,
@@ -176,7 +171,6 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
 
             if (cursor.moveToFirst()) {
                 do {
-
                     recentTracks.add(new RecentTrack(
                             cursor.getString(recentTrackNameIndex),
                             cursor.getString(recentTrackArtistIndex),
@@ -190,8 +184,6 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
                         Util.API_KEY,
                         recentTracks);
                 scrobbleLoader.forceLoad();
-
-                //Util.updateAfterScrobble(this, mListAdapter);
 
             } else {
                 Toast.makeText(this, "Nothing to scrobble!", Toast.LENGTH_SHORT).show();
@@ -215,7 +207,10 @@ public class RecentTracksActivity extends ActionBarActivity implements LoaderMan
 
     @Override
     public void onLoadFinished(Loader<ArrayList<RecentTrack>> loader, ArrayList<RecentTrack> data) {
-        Log.d(LOG_TAG, "Finished loading.");
+        if (data == null){
+            Toast.makeText(this, getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         mListAdapter.clear();
 

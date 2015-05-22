@@ -74,8 +74,10 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
         nameValuePairs.add(new BasicNameValuePair("api_key", apiKey));
         nameValuePairs.add(new BasicNameValuePair("api_sig", apiSignature));
 
-
         try {
+            if (!Util.isInternetAvailable()){
+                return Util.ERROR_NO_INTERNET;
+            }
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
             HttpResponse response = httpclient.execute(httpPost);
 
@@ -106,17 +108,13 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
                 return sessionKey;
             }
 
-
-
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            return e.getMessage();
         } catch (IOException e){
-            e.printStackTrace();
+            return e.getMessage();
         } catch (JSONException e){
-            e.printStackTrace();
+            return e.getMessage();
         }
-
-        return null;
     }
 
     @Override
@@ -131,31 +129,26 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
             try {
                 String numberOfError = rootJson.getString("error");
                 String errMessg = rootJson.getString("message");
-                //errMessage = numberOfError + errMessg;
-                Log.d(LOG_TAG,"Error here");
                 return true;
             } catch (JSONException e){
                 return false;
             }
 
         } catch (JSONException e){
-            e.printStackTrace();
+            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         return true;
-
     }
 
     private String parseSessionKeyFromJson(String loginJsonStr) throws JSONException {
         try{
             JSONObject loginJson = new JSONObject(loginJsonStr);
-
-            Log.d(LOG_TAG, "Login json str: " + loginJsonStr);
             JSONObject sessionJson = loginJson.getJSONObject("session");
 
             return sessionJson.getString("key");
 
         } catch (JSONException e){
-            e.printStackTrace();
+            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         return null;
     }
@@ -167,7 +160,7 @@ public class SessionKeyLoader extends AsyncTaskLoader<String> {
 
             return sessionJson.getString("name");
         } catch (JSONException e){
-            e.printStackTrace();
+            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         return null;
     }

@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
+import com.example.andrey.betterlastfm.Util;
 import com.example.andrey.betterlastfm.model.Friend;
 
 import org.json.JSONArray;
@@ -41,7 +42,9 @@ public class FriendsLoader extends AsyncTaskLoader<ArrayList<Friend>> {
     public ArrayList<Friend> loadInBackground() {
         if (mUserName.equals(""))
             return null;
-
+        if (!Util.isInternetAvailable()){
+            return null;
+        }
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
@@ -90,11 +93,9 @@ public class FriendsLoader extends AsyncTaskLoader<ArrayList<Friend>> {
             friends = getFriendsFromJson(friendsJsonStr);
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
             return null;
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "Error parcing JSON friends: ", e);
-            e.printStackTrace();
+            return null;
         } finally {
             if (urlConnection != null)
                 urlConnection.disconnect();
@@ -135,8 +136,7 @@ public class FriendsLoader extends AsyncTaskLoader<ArrayList<Friend>> {
                         new Friend(userJsonArray.getJSONObject(i).getString(NAME), imageURL));
             }
         } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
+            return null;
         }
 
         return friendArrayList;

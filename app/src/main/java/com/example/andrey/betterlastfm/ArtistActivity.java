@@ -68,10 +68,6 @@ public class ArtistActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_artist);
 
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            ;
-        }
-
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         mArtistPic = (ImageView) findViewById(R.id.artists_list_imageview);
@@ -175,9 +171,6 @@ public class ArtistActivity extends ActionBarActivity
         getLoaderManager().getLoader(0).stopLoading();
     }
 
-    /**
-     * TODO: This method might be the cause of not re-creating scroll state.
-     */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -216,10 +209,14 @@ public class ArtistActivity extends ActionBarActivity
 
     @Override
     public void onLoadFinished(Loader<Artist> loader, Artist data) {
+        if (data == null){
+            Toast.makeText(this, getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         try {
             loadPic(data);
         } catch (FileNotFoundException e){
-            e.printStackTrace();
             Toast.makeText(this, "Something wrong, reload this page later!", Toast.LENGTH_SHORT)
                     .show();
         }
@@ -259,7 +256,6 @@ public class ArtistActivity extends ActionBarActivity
     }
 
     private void loadPic (Artist data) throws FileNotFoundException{
-
         switch (getResources().getConfiguration().orientation){
             case Configuration.ORIENTATION_PORTRAIT:
                 Picasso.with(this)
@@ -278,6 +274,5 @@ public class ArtistActivity extends ActionBarActivity
 
                 break;
         }
-
     }
 }

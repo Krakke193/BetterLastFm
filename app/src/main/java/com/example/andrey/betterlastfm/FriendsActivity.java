@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.andrey.betterlastfm.adapters.FriendsAdapter;
 import com.example.andrey.betterlastfm.loaders.FriendsLoader;
@@ -97,6 +98,10 @@ public class FriendsActivity extends ActionBarActivity implements LoaderManager.
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Friend>> loader, ArrayList<Friend> data) {
+        if (data == null){
+            Toast.makeText(this, getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+            return;
+        }
         mFrienListAdapter.clear();
         for (Friend friend : data) {
             mFrienListAdapter.add(friend);

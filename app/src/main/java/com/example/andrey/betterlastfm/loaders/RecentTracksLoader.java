@@ -63,6 +63,9 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
             return null;
 
         try {
+            if (!Util.isInternetAvailable()){
+                return null;
+            }
             final String PROFILE_BASE_URL = "http://ws.audioscrobbler.com/2.0/?";
             final String METHOD_TYPE = "method";
             final String USER = "user";
@@ -99,12 +102,10 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
             mProfileRecentTracks = getRecentTracksFromJson(profileRecentTracksJsonStr);
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
             return null;
 
         } catch (JSONException e){
-            Log.e(LOG_TAG, "Error parcing JSON header: ", e);
-            e.printStackTrace();
+            return null;
 
         } finally {
             if (urlConnection != null)
@@ -195,8 +196,7 @@ public class RecentTracksLoader extends AsyncTaskLoader<ArrayList<RecentTrack>> 
                 }
             }
         } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
+            return null;
         }
 
         return recentTrackArrayList;

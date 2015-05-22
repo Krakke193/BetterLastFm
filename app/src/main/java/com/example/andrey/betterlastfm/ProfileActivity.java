@@ -155,7 +155,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             int recentTrackURLIndex = cursor
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_ICON_URL);
 
-
             if (cursor.moveToFirst()){
                 tracksListLinearLayout.removeAllViews();
                 for (int i=0; i<5; i++) {
@@ -175,7 +174,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                         Picasso.with(this).load(cursor.getString(recentTrackURLIndex)).into(imageView);
 
                     tracksListLinearLayout.addView(listItemView);
-                    Log.d(LOG_TAG, "Added new childview");
 
                     ImageView divider1 = new ImageView(this);
                     LinearLayout.LayoutParams lp1 =
@@ -191,7 +189,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             }
         } catch (Exception e){
             getLoaderManager().getLoader(0).forceLoad();
-            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -218,8 +216,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
             int currentFullWidth = mShrdPrefs.getInt("full_width", 50);
 
-            Log.d(LOG_TAG, Integer.toString(currentFullWidth));
-
             int fullPlays = Integer.parseInt(cursor.getString(topArtistsPlaycount)
                     .replaceAll("plays",""));
 
@@ -235,8 +231,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
                 float percentage = (Integer.parseInt(cursor.getString(topArtistsPlaycount)
                         .replaceAll("plays","")) * 100 / fullPlays);
-
-                Log.d(LOG_TAG, Float.toString(percentage));
 
                 ImageView relativeBar = (ImageView) view.findViewById(R.id.artists_relativebar_imageview);
 
@@ -254,8 +248,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                         TextView temp = (TextView) v.findViewById(R.id.artists_list_name_textview);
                         Intent intent = new Intent(getApplicationContext(), ArtistActivity.class)
                                 .putExtra(Util.ARTIST_KEY, temp.getText());
-
-                        //startActivity(intent);
 
                         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                             imageView.setTransitionName("artistPic");
@@ -315,8 +307,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                     SharedPreferences.Editor shrdEditor = mShrdPrefs.edit();
                     shrdEditor.putInt("full_width", fullWidth);
                     shrdEditor.commit();
-
-                    Log.d(LOG_TAG, "From this new method: " + Integer.toString(fullWidth));
                 }
                 tempLinearLayout.setVisibility(View.GONE);
                 return true;
@@ -344,8 +334,7 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 bar.setVisibility(View.VISIBLE);
                 getLoaderManager().getLoader(0).forceLoad();
             } catch (Exception e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -380,14 +369,11 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                // code here will execute once the drawer is opened( As I dont want anything happened whe drawer is
-                // open I am not going to put anything here)
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                // Code here will execute once drawer is closed
             }
 
         };
@@ -399,7 +385,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     protected void onResume() {
         super.onResume();
 
-        Log.d(LOG_TAG, "ON RESUMED!");
         if (mUserName.equals(mShrdPrefs.getString("username", "ERROR"))){
             fillHeader();
             fillRecentTracks();
@@ -456,7 +441,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                     .getColumnIndex(ProfileContract.RecentTracksEntry.COLUMN_TRACK_TIMESTAMP);
 
             if (cursor.moveToFirst()){
-                int i = 0;
                 do{
                     profileRecentTracks.add(new RecentTrack(
                             cursor.getString(recentTrackNameIndex),
@@ -507,6 +491,10 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
     public void onLoadFinished(Loader<Profile> loader, Profile data) {
         bar.setVisibility(View.GONE);
 
+        if (data == null) {
+            Toast.makeText(this, getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+            return;
+        }
         ArrayList<String> profileHeaderArray = data.getProfileHeaderArray();
         ArrayList<RecentTrack> profileRecentTracks = data.getProfileRecentTracks();
         ArrayList<TopArtist> profileTopArtists = data.getProfileTopArtists();
@@ -531,7 +519,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
         ProfileActivity.artistsListLinearLayout.removeAllViews();
 
         if (profileRecentTracks.size() != 0 && profileTopArtists.size() != 0) {
-
             for(int i=0; i<5; i++) {
                 View recentTrackView = LayoutInflater.from(this).inflate(R.layout.item_recent_tracks_list, null);
                 ((TextView) recentTrackView.findViewById(R.id.list_textview))
@@ -541,7 +528,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
                 ((TextView) recentTrackView.findViewById(R.id.recent_tracks_list_date))
                         .setText(profileRecentTracks.get(i).getTrackDate());
-
 
                 ImageView imageView = (ImageView) recentTrackView.findViewById(R.id.list_imageview);
 
@@ -559,15 +545,11 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
                 ProfileActivity.tracksListLinearLayout.addView(divider1);
             }
 
-
-
             int fullPlays = Integer.parseInt(profileTopArtists.get(0).getArtistPlays().replaceAll("plays", ""));
             int currentFullWidth = mShrdPrefs.getInt("full_width", 50);
 
             for (int i=0; i<profileTopArtists.size(); i++){
                 View view = LayoutInflater.from(this).inflate(R.layout.item_artists_list, null);
-
-                //final ImageView
 
                 final ImageView imageView = (ImageView) view.findViewById(R.id.artists_list_imageview);
 
@@ -624,6 +606,6 @@ public class ProfileActivity extends ActionBarActivity implements LoaderManager.
 
     @Override
     public void onLoaderReset(Loader<Profile> loader) {
-        Log.d(LOG_TAG, "Loader reseted?");
+
     }
 }
